@@ -1,0 +1,2267 @@
+{
+  "info": {
+    "_postman_id": "fda60f09-83b7-4f8f-a38a-1c28e093800f",
+    "name": "pay Copy",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34375509"
+  },
+  "item": [
+    {
+      "name": "plan",
+      "item": [
+        {
+          "name": "admin tongle plans",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "/admin/:id/toggle",
+              "path": [
+                "admin",
+                ":id",
+                "toggle"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all plans",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}plans/admin",
+              "host": [
+                "{{paylocal}}plans"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MTYyODI5OSwiZXhwIjoxNzgyMjMzMDk5fQ.4H_0GVIr4bTSESJcU1Ek5oor62URJoGcvfV8bFnFda0",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "  {\"name\": \"Gold\",\n  \"incomeOnApproval\":5,\n            \"amount\": 1999,\n            \"description\": \"Unlimited transactions with cashback Membership benefits.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}plans/admin",
+              "host": [
+                "{{paylocal}}plans"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update plans",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "  {\"name\": \"Gold\",\r\n            \"amount\": 1399,\r\n            \"description\": \"Unlimited transactions with cashback Membership benefits.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}plans/admin/6a265e31aa6616b5229e9344",
+              "host": [
+                "{{paylocal}}plans"
+              ],
+              "path": [
+                "admin",
+                "6a265e31aa6616b5229e9344"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete plans",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "  {\"name\": \"Gold\",\r\n            \"amount\": 1399,\r\n            \"description\": \"Unlimited transactions with cashback Membership benefits.\"}"
+            },
+            "url": {
+              "raw": "{{paylocal}}plans/admin/6a20e4b6035e8afb971f3597",
+              "host": [
+                "{{paylocal}}plans"
+              ],
+              "path": [
+                "admin",
+                "6a20e4b6035e8afb971f3597"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "toggelPlan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}plans/admin/6a265e1caa6616b5229e9340/toggle",
+              "host": [
+                "{{paylocal}}plans"
+              ],
+              "path": [
+                "admin",
+                "6a265e1caa6616b5229e9340",
+                "toggle"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get plans",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}plans",
+              "host": [
+                "{{paylocal}}plans"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "giftcode",
+      "item": [
+        {
+          "name": "get all gifts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}gift-codes/admin",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create gifts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"code\": \"FESTIVE50\",\r\n  \"rewardAmount\": 50,\r\n  \"maxUsers\": 200,\r\n  \"expiryDate\": \"2026-10-31T23:59:59.000Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}gift-codes/admin",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update gift code",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"code\": \"FESTIVE40\",\r\n  \"rewardAmount\": 60,\r\n  \"maxUsers\": 500,\r\n  \"expiryDate\": \"2026-10-31T23:59:59.000Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}gift-codes/admin/6a2662b3aa6616b5229e9365",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "admin",
+                "6a2662b3aa6616b5229e9365"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete gift code",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}gift-codes/admin/6a26628aaa6616b5229e935d",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "admin",
+                "6a26628aaa6616b5229e935d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "toggelGiftCodes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}gift-codes/admin/6a2662b3aa6616b5229e9365/toggle",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "admin",
+                "6a2662b3aa6616b5229e9365",
+                "toggle"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "redeem",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzE1Y2RhODlhNjI4YmZmODc1YjFlYiIsImlhdCI6MTc4MTcwMjc3NSwiZXhwIjoxNzgyMzA3NTc1fQ.1tnN5ITdaLBqq0hFkffAw3Qs8Ih2hEq24gl4Of4sFL4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n           \"code\": \"FESTIVE50\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}gift-codes/redeem",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "redeem"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get gift for user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}gift-codes/active",
+              "host": [
+                "{{paylocal}}gift-codes"
+              ],
+              "path": [
+                "active"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/dashboard",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUsers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/users",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUserDetails",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/users/6a265cedaa6616b5229e932c",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "users",
+                "6a265cedaa6616b5229e932c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Block",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/users/6a265cedaa6616b5229e932c/block",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "users",
+                "6a265cedaa6616b5229e932c",
+                "block"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "unBlocked",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/users/6a265cedaa6616b5229e932c/unblock",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "users",
+                "6a265cedaa6616b5229e932c",
+                "unblock"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "activeUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/users/6a265cedaa6616b5229e932c/activate",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "users",
+                "6a265cedaa6616b5229e932c",
+                "activate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deactivateUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/users/6a265cedaa6616b5229e932c/deactivate",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "users",
+                "6a265cedaa6616b5229e932c",
+                "deactivate"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fullName\":\"abhi\",\r\n    \"phoneNumber\":\"0123456789\",\r\n    \"email\":\"hello@gmail.com\",\r\n    \"password\":\"123456\",\r\n    \"role\":\"user\",\r\n    \"referralCode\":\"4NV9MV3G\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}auth/register",
+              "host": [
+                "{{paylocal}}auth"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sendOtp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\n    \"email\":\"hello1@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}auth/send-otp",
+              "host": [
+                "{{paylocal}}auth"
+              ],
+              "path": [
+                "send-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verifyOtp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\":\"abhishekmishra06460@gmail.com\",\n    \"otp\":\"290297\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}auth/verify-otp",
+              "host": [
+                "{{paylocal}}auth"
+              ],
+              "path": [
+                "verify-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getMe",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU3MjRlYmUxZTczZWVkNjk0NTIzYyIsImlhdCI6MTc4MDg5NzQ1NSwiZXhwIjoxNzgxNTAyMjU1fQ.furnvjRbgnQE7Bc8LcfteLO2G2ricEXwrqX8kQ0alKQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}auth/me",
+              "host": [
+                "{{paylocal}}auth"
+              ],
+              "path": [
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateProfile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU3MjRlYmUxZTczZWVkNjk0NTIzYyIsImlhdCI6MTc4MDg5NzQ1NSwiZXhwIjoxNzgxNTAyMjU1fQ.furnvjRbgnQE7Bc8LcfteLO2G2ricEXwrqX8kQ0alKQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\r\n{\r\n    \"fullName\":\"sandeep\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}auth/update-profile",
+              "host": [
+                "{{paylocal}}auth"
+              ],
+              "path": [
+                "update-profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify_email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:5003/api/auth/verify-email/cb80f3ce460cb10b0eca377b669a854527bb0f55706c3e94bcf385a40ea6da12",
+              "host": [
+                "localhost"
+              ],
+              "port": "5003",
+              "path": [
+                "api",
+                "auth",
+                "verify-email",
+                "cb80f3ce460cb10b0eca377b669a854527bb0f55706c3e94bcf385a40ea6da12"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "notification",
+      "item": [
+        {
+          "name": "getNotifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}notifications",
+              "host": [
+                "{{paylocal}}notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUnreadCount",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}notifications/unread-count",
+              "host": [
+                "{{paylocal}}notifications"
+              ],
+              "path": [
+                "unread-count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "markAllRead",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}notifications/read-all",
+              "host": [
+                "{{paylocal}}notifications"
+              ],
+              "path": [
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "markRead",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}notifications/6a256d2e6eb9af80615c2e15/read",
+              "host": [
+                "{{paylocal}}notifications"
+              ],
+              "path": [
+                "6a256d2e6eb9af80615c2e15",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "deposit",
+      "item": [
+        {
+          "name": "adminApproved",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"reason\":\"Payment proof is unclear or unreadable.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}deposits/admin/6a20e561035e8afb971f359e/approve",
+              "host": [
+                "{{paylocal}}deposits"
+              ],
+              "path": [
+                "admin",
+                "6a20e561035e8afb971f359e",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "adminReject",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}deposits/admin/6a20e561035e8afb971f359e/reject",
+              "host": [
+                "{{paylocal}}deposits"
+              ],
+              "path": [
+                "admin",
+                "6a20e561035e8afb971f359e",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "userCreateDeposit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "planId",
+                  "value": "6a265e1caa6616b5229e9340",
+                  "type": "text",
+                  "uuid": "eec9bbc7-ea56-48aa-a8b7-25cf638e3425"
+                },
+                {
+                  "key": "transactionRef",
+                  "value": "TXN123456756",
+                  "type": "text",
+                  "uuid": "a06da865-3c16-480b-b7a4-eba0b28e01bc"
+                },
+                {
+                  "key": "amount",
+                  "value": "4000",
+                  "type": "text",
+                  "uuid": "9b6b01cd-8ad6-4ee4-a0e6-56c28f1aae9a"
+                },
+                {
+                  "key": "paymentProof",
+                  "type": "file",
+                  "uuid": "e4d03a2c-442c-41c3-bade-6cbbe34c87ed",
+                  "src": "/C:/Users/sgupt/OneDrive/Pictures/Screenshots/Screenshot 2026-05-02 204127.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{paylocal}}deposits",
+              "host": [
+                "{{paylocal}}deposits"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllDeposits",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}deposits/admin",
+              "host": [
+                "{{paylocal}}deposits"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUserDeposit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}deposits",
+              "host": [
+                "{{paylocal}}deposits"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "setings",
+      "item": [
+        {
+          "name": "getPublicSettings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}app/settings",
+              "host": [
+                "{{paylocal}}app"
+              ],
+              "path": [
+                "settings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getPaymentMethod",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}payment-methods",
+              "host": [
+                "{{paylocal}}payment-methods"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getContacts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}contacts",
+              "host": [
+                "{{paylocal}}contacts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSettings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/settings",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "settings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateMentenance",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"maintenanceMode\": true,\r\n  \"maintenanceMessage\": \"The system is currently under maintenance. Please try again later.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}admin/settings/maintenance",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "settings",
+                "maintenance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateAppControll",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"forceUpdate\": true,\r\n  \"updateMessage\": \"A new version of the app is available. Please update to continue using the application.\",\r\n  \"currentVersion\": \"2.1.0\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}admin/settings/update-control",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "settings",
+                "update-control"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updatePaymentMethods",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"qrCode\": {\r\n    \"enabled\": true,\r\n    \"imageUrl\": \"https://example.com/uploads/qr-code.png\"\r\n  },\r\n  \"bankAccount\": {\r\n    \"enabled\": true,\r\n    \"accountHolder\": \"Sandeep Gupta\",\r\n    \"bankName\": \"State Bank of India\",\r\n    \"accountNumber\": \"123456789012\",\r\n    \"ifscCode\": \"SBIN0001234\",\r\n    \"upiId\": \"sandeep@upi\"\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}admin/settings/payment",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "settings",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "addContacts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"type\": \"support\",\r\n  \"label\": \"Help Center\",\r\n  \"value\": \"https://example.com/support\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}admin/contacts",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "contacts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateContact",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "  {\r\n            \"type\": \"whatsapp\",\r\n            \"label\": \"WhatsApp Support urgent\",\r\n            \"value\": \"9198140806\"\r\n        }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}admin/contacts/6a267c8d0913d8ca8ada628b",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "contacts",
+                "6a267c8d0913d8ca8ada628b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteContact",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}admin/contacts/6a267cd10913d8ca8ada62b3",
+              "host": [
+                "{{paylocal}}admin"
+              ],
+              "path": [
+                "contacts",
+                "6a267cd10913d8ca8ada62b3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "withdrawal",
+      "item": [
+        {
+          "name": "createWithdrawal",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"amount\": 5,\r\n  \"bankDetails\": {\r\n    \"accountHolderName\": \"Sandeep Gupta\",\r\n    \"bankName\": \"State Bank of India\",\r\n    \"accountNumber\": \"123456789012\",\r\n    \"ifscCode\": \"SBIN0001234\",\r\n    \"upiId\": \"sandeep@upi\"\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}withdrawals",
+              "host": [
+                "{{paylocal}}withdrawals"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUserWithdrawals",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}withdrawals",
+              "host": [
+                "{{paylocal}}withdrawals"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllWithdrawals admin",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}withdrawals/admin",
+              "host": [
+                "{{paylocal}}withdrawals"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "adminApproveWithdrawal",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}withdrawals/admin/6a269b260913d8ca8ada63be/approve",
+              "host": [
+                "{{paylocal}}withdrawals"
+              ],
+              "path": [
+                "admin",
+                "6a269b260913d8ca8ada63be",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rejectWithdrawal admin",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}withdrawals/admin/6a269b260913d8ca8ada63be/reject",
+              "host": [
+                "{{paylocal}}withdrawals"
+              ],
+              "path": [
+                "admin",
+                "6a269b260913d8ca8ada63be",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "tasks",
+      "item": [
+        {
+          "name": "userGetTask",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks",
+              "host": [
+                "{{paylocal}}tasks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "userSubmitTask",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "proof",
+                  "type": "file",
+                  "uuid": "70640657-7383-4e7a-b6e1-0fa535afa7ff",
+                  "src": "postman-cloud:///1f163238-2fc1-4600-a80e-885e252bea84"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{paylocal}}tasks/6a2691310913d8ca8ada6334/submit",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "6a2691310913d8ca8ada6334",
+                "submit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUserSubmissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/submissions",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "submissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createTask",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Complete Profile\",\r\n  \"description\": \"Fill out all profile information including name, email, and phone number.\",\r\n  \"rewardAmount\": 25\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}tasks/admin",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateTask",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n        \"title\": \"Complete Profile blog\",\r\n        \"description\": \"Fill out all profile information including name, email, and phone number email id.\",\r\n        \"rewardAmount\": 30\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}tasks/admin/6a2691490913d8ca8ada633c",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin",
+                "6a2691490913d8ca8ada633c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteTask",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/admin/6a2691180913d8ca8ada632c",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin",
+                "6a2691180913d8ca8ada632c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "toggleTask",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/admin/6a2691490913d8ca8ada633c/toggle",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin",
+                "6a2691490913d8ca8ada633c",
+                "toggle"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllSubmissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/admin/submissions",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin",
+                "submissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "approveSubmission",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/admin/submissions/6a26983f0913d8ca8ada6371/approve",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin",
+                "submissions",
+                "6a26983f0913d8ca8ada6371",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rejectSubmission",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/admin/submissions/6a2697310913d8ca8ada635f/reject",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin",
+                "submissions",
+                "6a2697310913d8ca8ada635f",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "adminGetAllTasks",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}tasks/admin",
+              "host": [
+                "{{paylocal}}tasks"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "wallet",
+      "item": [
+        {
+          "name": "getTransactions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}wallet/transactions",
+              "host": [
+                "{{paylocal}}wallet"
+              ],
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "adminAdjustWallet",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjBlNDlmZTU4YjVmZTllZDg1ODZjNCIsImlhdCI6MTc4MDg5OTE0OCwiZXhwIjoxNzgxNTAzOTQ4fQ.jdm0qk-B6flANnTFzTx-j40Z4oIRFcuy93e4NufID0w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\":\"6a265cedaa6616b5229e932c\",\r\n     \"amount\": 3000,\r\n  \"type\": \"credit\",\r\n  \"description\": \"Referral bonus added by admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}wallet/admin/adjust",
+              "host": [
+                "{{paylocal}}wallet"
+              ],
+              "path": [
+                "admin",
+                "adjust"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getWallet",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjU2ZDJlNmViOWFmODA2MTVjMmUxMCIsImlhdCI6MTc4MDkwMjM2OSwiZXhwIjoxNzgxNTA3MTY5fQ.Vk-FQcqmRVZYE_98rQTGrQgn59XxC2PvpqmE1cbces4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}wallet",
+              "host": [
+                "{{paylocal}}wallet"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "refrel",
+      "item": [
+        {
+          "name": "my-team",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzE1YzIyMzJmZjlmNjRhYjRiZjJhZSIsImlhdCI6MTc4MTYyMDExMSwiZXhwIjoxNzgyMjI0OTExfQ.e0SA4EEtZoLgdY8HPRm4pKh1F-F1832V0JK5iSVrFzA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}referral/my-team",
+              "host": [
+                "{{paylocal}}referral"
+              ],
+              "path": [
+                "my-team"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "commissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzE1YzIyMzJmZjlmNjRhYjRiZjJhZSIsImlhdCI6MTc4MTYyMDExMSwiZXhwIjoxNzgyMjI0OTExfQ.e0SA4EEtZoLgdY8HPRm4pKh1F-F1832V0JK5iSVrFzA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}referral/commissions",
+              "host": [
+                "{{paylocal}}referral"
+              ],
+              "path": [
+                "commissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "stats",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzE1YzIyMzJmZjlmNjRhYjRiZjJhZSIsImlhdCI6MTc4MTYyMDExMSwiZXhwIjoxNzgyMjI0OTExfQ.e0SA4EEtZoLgdY8HPRm4pKh1F-F1832V0JK5iSVrFzA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}referral/stats",
+              "host": [
+                "{{paylocal}}referral"
+              ],
+              "path": [
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/admin/commissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}referral/admin/commissions",
+              "host": [
+                "{{paylocal}}referral"
+              ],
+              "path": [
+                "admin",
+                "commissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/admin/run-income'",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}referral/admin/run-income",
+              "host": [
+                "{{paylocal}}referral"
+              ],
+              "path": [
+                "admin",
+                "run-income"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "upi",
+      "item": [
+        {
+          "name": "get user  upi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzE1Y2RhODlhNjI4YmZmODc1YjFlYiIsImlhdCI6MTc4MTcwMjc3NSwiZXhwIjoxNzgyMzA3NTc1fQ.1tnN5ITdaLBqq0hFkffAw3Qs8Ih2hEq24gl4Of4sFL4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}}upi/my",
+              "host": [
+                "{{paylocal}}upi"
+              ],
+              "path": [
+                "my"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}} upi/:id",
+              "host": [
+                "{{paylocal}} upi"
+              ],
+              "path": [
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete upi for user",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}} upi/:id",
+              "host": [
+                "{{paylocal}} upi"
+              ],
+              "path": [
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "user create upi id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzE1Y2RhODlhNjI4YmZmODc1YjFlYiIsImlhdCI6MTc4MTcwMjc3NSwiZXhwIjoxNzgyMzA3NTc1fQ.1tnN5ITdaLBqq0hFkffAw3Qs8Ih2hEq24gl4Of4sFL4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"upiId\": \"abhishek@ybl\",\n  \"accountHolderName\": \"Abhishek Mishra\",\n  \"isPrimary\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{paylocal}}upi/",
+              "host": [
+                "{{paylocal}}upi"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "admin get all upi id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paylocal}} upi/admin/all",
+              "host": [
+                "{{paylocal}} upi"
+              ],
+              "path": [
+                "admin",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "paylocal",
+      "value": ""
+    }
+  ]
+}
