@@ -51,10 +51,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchMe = async () => {
     try {
       const res = await authApi.getMe();
-      if (res.data && res.data.user) {
-        setUser(res.data.user);
-      } else if (res.data) {
-        setUser(res.data);
+      const userData = res.data?.data || res.data?.user || res.data;
+      if (userData && userData.email) {
+        const cleanEmail = userData.email.toLowerCase();
+        if (userData.role !== 'admin' || cleanEmail !== 'audacious.here@gmail.com') {
+          logout('Access denied: Only audacious.here@gmail.com has admin access');
+          return;
+        }
+        setUser(userData);
       }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
@@ -111,7 +115,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendOtp = async (email: string) => {
     try {
-      await authApi.sendOtp(email);
+      const cleanEmail = email.trim().toLowerCase();
+      if (cleanEmail !== 'audacious.here@gmail.com') {
+        throw new Error('Access denied: Only audacious.here@gmail.com is authorized for Admin access');
+      }
+      await authApi.sendOtp(cleanEmail);
       toast.success('OTP sent successfully to your email!');
     } catch (err: any) {
       toast.error(err.message || 'Failed to send OTP');
@@ -121,12 +129,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyOtp = async (email: string, otp: string) => {
     try {
-      const res = await authApi.verifyOtp(email, otp);
+      const cleanEmail = email.trim().toLowerCase();
+      if (cleanEmail !== 'audacious.here@gmail.com') {
+        throw new Error('Access denied: Only audacious.here@gmail.com is authorized for Admin access');
+      }
+      const res = await authApi.verifyOtp(cleanEmail, otp);
       const token = res.data?.token || res.data?.data?.token;
       if (token) {
         localStorage.setItem('token', token);
         await fetchMe();
-        toast.success('Logged in successfully!');
+        toast.success('Admin logged in successfully!');
         router.push('/admin');
       } else {
         throw new Error('No token returned from server');

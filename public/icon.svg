@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Modern Indigo to Violet Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3730A3" />
+      <stop offset="35%" stop-color="#4F46E5" />
+      <stop offset="70%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <!-- Lighting Sheen & Depth Overlay -->
+    <linearGradient id="lighting" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.32" />
+      <stop offset="28%" stop-color="#FFFFFF" stop-opacity="0.05" />
+      <stop offset="85%" stop-color="#000000" stop-opacity="0.0" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22" />
+    </linearGradient>
+  </defs>
+
+  <!-- Modern Squircle (Superellipse r=128 on 512) -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <rect width="512" height="512" rx="128" fill="url(#lighting)" />
+
+  <!-- Crisp Premium Inner Border -->
+  <rect x="12" y="12" width="488" height="488" rx="116" fill="none" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="14" />
+
+  <!-- Monogram GD -->
+  <text x="256" y="342" 
+    font-family="'Arial Black', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" 
+    font-weight="900" 
+    font-size="232" 
+    letter-spacing="-10" 
+    fill="#FFFFFF" 
+    text-anchor="middle">GD</text>
+</svg>

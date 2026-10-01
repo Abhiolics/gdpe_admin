@@ -20,11 +20,11 @@ const TabContext = createContext<TabContextProps>({
 export const useTab = () => useContext(TabContext);
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const bypassAuth = true;
+  const bypassAuth = false;
 
   // Sync tab with URL parameter on load
   useEffect(() => {
@@ -45,10 +45,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   useEffect(() => {
-    if (!bypassAuth && !isLoading && !isAuthenticated) {
-      router.push('/auth/login');
+    if (!bypassAuth && !isLoading) {
+      if (!isAuthenticated || user?.role !== 'admin' || user?.email?.toLowerCase() !== 'audacious.here@gmail.com') {
+        router.push('/auth/login');
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   if (isLoading) {
     return (
