@@ -11,12 +11,12 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const { sendOtp, verifyOtp } = useAuth();
-  const [email, setEmail] = useState("audacious.here@gmail.com");
+  const [email, setEmail] = useState("keralawins123@gmail.com");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");
   const [isLoading, setIsLoading] = useState(false);
 
-  const authorizedEmail = "audacious.here@gmail.com";
+  const authorizedEmail = "keralawins123@gmail.com";
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +65,7 @@ export default function LoginPage() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight text-white flex items-center justify-center gap-1.5">
-            <span>GDP<span className="text-emerald-400">e</span> Admin Portal</span>
+            <span>GD<span className="text-emerald-400">Pay</span> Admin Portal</span>
           </CardTitle>
           <CardDescription className="text-slate-400 text-xs">
             {step === "email" 

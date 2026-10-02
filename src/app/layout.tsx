@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GDPe Admin | Operations & Management Portal",
+  title: "GDPay Admin | Operations & Management Portal",
   description: "Enterprise Operations & Admin Panel for GDPe platform",
   icons: {
     icon: [

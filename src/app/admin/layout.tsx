@@ -46,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!bypassAuth && !isLoading) {
-      if (!isAuthenticated || user?.role !== 'admin' || user?.email?.toLowerCase() !== 'audacious.here@gmail.com') {
+      if (!isAuthenticated || user?.role !== 'admin' || user?.email?.toLowerCase() !== 'keralawins123@gmail.com') {
         router.push('/auth/login');
       }
     }

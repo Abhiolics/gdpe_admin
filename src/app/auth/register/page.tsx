@@ -54,10 +54,10 @@ export default function RegisterPage() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight text-white flex items-center justify-center gap-1.5">
-            <span>Create <span className="text-emerald-400">GDP<span className="text-white">e</span></span> Admin</span>
+            <span>Create <span className="text-emerald-400">GD<span className="text-white">Pay</span></span> Admin</span>
           </CardTitle>
           <CardDescription className="text-slate-400 text-xs">
-            Sign up as an administrator for GDPe Operations
+            Sign up as an administrator for GDPay Operations
           </CardDescription>
         </CardHeader>
 

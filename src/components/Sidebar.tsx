@@ -88,7 +88,7 @@ export default function Sidebar({ className, activeTab, setActiveTab }: SidebarP
             <span className="text-sm font-black tracking-tighter text-slate-950">GD</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-lg font-black tracking-tight text-white">GDP<span className="text-emerald-400">e</span></span>
+            <span className="text-lg font-black tracking-tight text-white">GD<span className="text-emerald-400">Pay</span></span>
             <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">Admin</span>
           </div>
         </button>

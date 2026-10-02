@@ -54,8 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userData = res.data?.data || res.data?.user || res.data;
       if (userData && userData.email) {
         const cleanEmail = userData.email.toLowerCase();
-        if (userData.role !== 'admin' || cleanEmail !== 'audacious.here@gmail.com') {
-          logout('Access denied: Only audacious.here@gmail.com has admin access');
+        if (userData.role !== 'admin' || cleanEmail !== 'keralawins123@gmail.com') {
+          logout('Access denied: Only keralawins123@gmail.com has admin access');
           return;
         }
         setUser(userData);
@@ -116,8 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendOtp = async (email: string) => {
     try {
       const cleanEmail = email.trim().toLowerCase();
-      if (cleanEmail !== 'audacious.here@gmail.com') {
-        throw new Error('Access denied: Only audacious.here@gmail.com is authorized for Admin access');
+      if (cleanEmail !== 'keralawins123@gmail.com') {
+        throw new Error('Access denied: Only keralawins123@gmail.com is authorized for Admin access');
       }
       await authApi.sendOtp(cleanEmail);
       toast.success('OTP sent successfully to your email!');
@@ -130,8 +130,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyOtp = async (email: string, otp: string) => {
     try {
       const cleanEmail = email.trim().toLowerCase();
-      if (cleanEmail !== 'audacious.here@gmail.com') {
-        throw new Error('Access denied: Only audacious.here@gmail.com is authorized for Admin access');
+      if (cleanEmail !== 'keralawins123@gmail.com') {
+        throw new Error('Access denied: Only keralawins123@gmail.com is authorized for Admin access');
       }
       const res = await authApi.verifyOtp(cleanEmail, otp);
       const token = res.data?.token || res.data?.data?.token;
