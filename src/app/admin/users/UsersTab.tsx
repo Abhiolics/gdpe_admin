@@ -222,11 +222,55 @@ export default function UserManagementPage() {
     });
   };
 
-  const filteredUsers = users.filter((user: any) => 
-    user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.phoneNumber.includes(searchTerm)
-  );
+  const getUserUpis = (u: any) => {
+    if (Array.isArray(u.upis) && u.upis.length > 0) {
+      return u.upis;
+    }
+    if (u.upi && typeof u.upi === 'object' && u.upi.upiId) {
+      return [u.upi];
+    }
+    if (u.upiId) {
+      return [{ 
+        _id: u.upi?._id || 'direct-upi',
+        upiId: u.upiId, 
+        accountHolderName: u.upi?.accountHolderName || u.fullName || '', 
+        isPrimary: true 
+      }];
+    }
+    if (Array.isArray(u.upiIds) && u.upiIds.length > 0) {
+      return u.upiIds.map((id: string, idx: number) => ({
+        _id: `upi-${idx}`,
+        upiId: id,
+        accountHolderName: u.fullName || '',
+        isPrimary: idx === 0,
+      }));
+    }
+    // If user object was returned from backend with upi fields, don't fallback to dummy
+    if (u.upis !== undefined || u.upi !== undefined || u.upiId !== undefined || u.upiIds !== undefined) {
+      return [];
+    }
+    const userId = u.id || u._id;
+    return upiList.filter((upi: any) => {
+      const upiUserId = upi.userId?._id || upi.userId?.id || upi.userId;
+      const upiUserObjId = upi.user?._id || upi.user?.id;
+      return upiUserId === userId || upiUserObjId === userId;
+    });
+  };
+
+  const filteredUsers = users.filter((user: any) => {
+    const term = searchTerm.toLowerCase();
+    const matchesName = user.fullName?.toLowerCase().includes(term);
+    const matchesEmail = user.email?.toLowerCase().includes(term);
+    const matchesPhone = user.phoneNumber?.includes(term);
+    const matchesUpiId = user.upiId?.toLowerCase().includes(term);
+    const matchesUpiObj = user.upi?.upiId?.toLowerCase().includes(term);
+    const matchesUpiIds = Array.isArray(user.upiIds) && user.upiIds.some((id: string) => id?.toLowerCase().includes(term));
+    const matchesUpis = Array.isArray(user.upis) && user.upis.some((upi: any) => 
+      upi?.upiId?.toLowerCase().includes(term) || upi?.accountHolderName?.toLowerCase().includes(term)
+    );
+
+    return matchesName || matchesEmail || matchesPhone || matchesUpiId || matchesUpiObj || matchesUpiIds || matchesUpis;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -285,11 +329,7 @@ export default function UserManagementPage() {
                 <TableBody>
                   {filteredUsers.map((u: any) => {
                     const userId = u.id || u._id;
-                    const userUpis = upiList.filter((upi: any) => {
-                      const upiUserId = upi.userId?._id || upi.userId?.id || upi.userId;
-                      const upiUserObjId = upi.user?._id || upi.user?.id;
-                      return upiUserId === userId || upiUserObjId === userId;
-                    });
+                    const userUpis = getUserUpis(u);
 
                     return (
                       <TableRow key={userId} className="border-slate-850 hover:bg-slate-900/20 transition-colors">
@@ -336,29 +376,42 @@ export default function UserManagementPage() {
                         </TableCell>
                         <TableCell className="text-center">
                           {userUpis.length === 0 ? (
-                            <span className="text-slate-600 text-xs italic">No UPI Registered</span>
+                            <span className="text-slate-500 text-xs italic">No UPI Registered</span>
                           ) : (
                             <div className="flex flex-col gap-1.5 items-center justify-center">
-                              {userUpis.map((upi: any) => (
-                                <div key={upi._id || upi.id} className="flex items-center gap-1.5 justify-center group/upi font-mono text-xs">
-                                  <span className="text-teal-400 font-semibold">{upi.upiId}</span>
-                                  {upi.isPrimary && (
-                                    <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 text-[9px] px-1 py-0 font-bold shrink-0">
-                                      Primary
-                                    </Badge>
-                                  )}
-                                  <button
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(upi.upiId);
-                                      toast.success(`Copied: ${upi.upiId}`);
-                                    }}
-                                    className="p-0.5 rounded text-slate-500 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors opacity-0 group-hover/upi:opacity-100 cursor-pointer"
-                                    title="Copy UPI ID"
-                                  >
-                                    <Copy className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
+                              {userUpis.map((upi: any, idx: number) => {
+                                const upiString = typeof upi === 'string' ? upi : upi.upiId;
+                                const isPrimary = upi.isPrimary ?? (idx === 0);
+                                if (!upiString) return null;
+                                return (
+                                  <div key={upi._id || upi.id || idx} className="flex flex-col items-center">
+                                    <div className="flex items-center gap-1.5 justify-center group/upi font-mono text-xs">
+                                      <span className="text-teal-400 font-semibold">{upiString}</span>
+                                      {isPrimary && (
+                                        <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 text-[9px] px-1 py-0 font-bold shrink-0">
+                                          Primary
+                                        </Badge>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(upiString);
+                                          toast.success(`Copied: ${upiString}`);
+                                        }}
+                                        className="p-0.5 rounded text-slate-500 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors opacity-70 group-hover/upi:opacity-100 cursor-pointer"
+                                        title="Copy UPI ID"
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                      </button>
+                                    </div>
+                                    {upi.accountHolderName && upi.accountHolderName !== u.fullName && (
+                                      <span className="text-[10px] text-slate-400 font-sans mt-0.5">
+                                        ({upi.accountHolderName})
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
                         </TableCell>
@@ -473,6 +526,19 @@ export default function UserManagementPage() {
             <DialogDescription className="text-slate-400 text-xs">
               Directly credit or debit wallet balance for <strong>{selectedUser?.fullName}</strong>.
             </DialogDescription>
+            {selectedUser && (() => {
+              const selectedUpis = getUserUpis(selectedUser);
+              const primaryUpi = selectedUpis.find((upi: any) => upi.isPrimary) || selectedUpis[0];
+              if (!primaryUpi) return null;
+              const upiStr = typeof primaryUpi === 'string' ? primaryUpi : primaryUpi.upiId;
+              if (!upiStr) return null;
+              return (
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-400">
+                  <span>Registered UPI:</span>
+                  <span className="font-mono text-teal-400 font-semibold">{upiStr}</span>
+                </div>
+              );
+            })()}
           </DialogHeader>
 
           <form onSubmit={handleWalletAdjustSubmit} className="space-y-4 pt-2">

@@ -2,7 +2,23 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { taskApi } from '@/lib/api';
+import { taskApi, API_BASE_URL } from '@/lib/api';
+
+// Helper to resolve proof image URLs across string URLs, relative paths, and Cloudinary objects
+const getProofUrl = (proof: any): string => {
+  if (!proof) return '';
+  if (typeof proof === 'string') {
+    if (proof.startsWith('http://') || proof.startsWith('https://')) {
+      return proof;
+    }
+    const base = API_BASE_URL ? API_BASE_URL.replace(/\/api\/?$/, '') : '';
+    return proof.startsWith('/') ? `${base}${proof}` : `${base}/${proof}`;
+  }
+  if (typeof proof === 'object') {
+    return proof.url || proof.secure_url || proof.path || '';
+  }
+  return '';
+};
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -432,8 +448,9 @@ export default function TasksPage() {
                         const subId = sub._id || sub.id;
                         const userName = sub.user?.fullName || 'Sandbox User';
                         const userEmail = sub.user?.email || 'user@example.com';
-                        const taskName = sub.taskId?.title || 'Unknown Task';
-                        const taskReward = sub.taskId?.rewardAmount || 0;
+                        const taskObj = sub.task || sub.taskId;
+                        const taskName = taskObj?.title || 'Unknown Task';
+                        const taskReward = sub.rewardAmount || taskObj?.rewardAmount || 0;
 
                         return (
                           <TableRow key={subId} className="border-slate-850 hover:bg-slate-900/20 transition-colors">
@@ -633,27 +650,48 @@ export default function TasksPage() {
               Submission Proof Audit
             </DialogTitle>
             <DialogDescription className="text-slate-400 text-xs">
-              Verify claims for task: <strong>{selectedSubmission?.taskId?.title}</strong>
+              Verify claims for task: <strong>{selectedSubmission?.task?.title || selectedSubmission?.taskId?.title}</strong>
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3">
             {/* Image display */}
             <div className="relative flex flex-col items-center justify-center border border-slate-800 bg-slate-950 rounded-xl overflow-hidden p-2 group h-64">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={selectedSubmission?.proof}
-                alt="Submitted proof screenshot"
-                className="max-h-full max-w-full object-contain rounded-lg transition-transform group-hover:scale-[1.02] duration-350"
-              />
-              <a 
-                href={selectedSubmission?.proof} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 px-3 py-1.5 text-[10px] font-semibold border border-slate-805 text-emerald-400 backdrop-blur-md shadow-lg"
-              >
-                Original Image <ExternalLink className="h-3 w-3" />
-              </a>
+              {(() => {
+                const proofUrl = getProofUrl(
+                  selectedSubmission?.proof ||
+                  selectedSubmission?.proofUrl ||
+                  selectedSubmission?.proofImage ||
+                  selectedSubmission?.paymentProof
+                );
+
+                if (!proofUrl) {
+                  return (
+                    <div className="flex flex-col items-center justify-center text-center p-4">
+                      <p className="text-xs text-slate-500">No proof screenshot provided</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={proofUrl}
+                      alt="Submitted proof screenshot"
+                      className="max-h-full max-w-full object-contain rounded-lg transition-transform group-hover:scale-[1.02] duration-300"
+                    />
+                    <a 
+                      href={proofUrl} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 px-3 py-1.5 text-[10px] font-semibold border border-slate-800 text-emerald-400 backdrop-blur-md shadow-lg"
+                    >
+                      Original Image <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Audit Details */}
@@ -666,7 +704,7 @@ export default function TasksPage() {
                   </div>
                   <div className="flex justify-between border-b border-slate-900 pb-1.5">
                     <span className="text-slate-500">Reward Value:</span>
-                    <span className="text-emerald-400 font-bold">₹{selectedSubmission?.taskId?.rewardAmount}</span>
+                    <span className="text-emerald-400 font-bold">₹{selectedSubmission?.rewardAmount || selectedSubmission?.task?.rewardAmount || selectedSubmission?.taskId?.rewardAmount || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Status:</span>
