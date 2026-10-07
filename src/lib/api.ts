@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 // Base URL for the backend API
-// export const API_BASE_URL = 'https://service.mdpay.info/api/';
 export const API_BASE_URL = 'https://gdpebackend.vercel.app/api/';
 
 export const apiClient = axios.create({

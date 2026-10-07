@@ -81,12 +81,25 @@ export default function DashboardPage() {
 
   const stats = dashboardRes?.data?.data || {};
 
-  // Calculate total task submissions if taskStats is available
-  const totalTaskAudits = stats.taskStats 
-    ? (stats.taskStats.pending + stats.taskStats.approved + stats.taskStats.rejected)
-    : 0;
+  // Extract nested metrics with backward compatibility for flat objects
+  const totalUsers = stats.users?.total ?? stats.totalUsers ?? 0;
+  const activeUsers = stats.users?.active ?? stats.activeUsers ?? 0;
+  const blockedUsers = stats.users?.blocked ?? stats.blockedUsers ?? 0;
 
-  // Fallback data if API values are missing or empty
+  const totalDepositsAmount = stats.deposits?.totalApprovedAmount ?? stats.totalDeposits ?? 0;
+  const pendingDeposits = stats.deposits?.pendingCount ?? stats.pendingDeposits ?? 0;
+
+  const totalWithdrawalsAmount = stats.withdrawals?.totalApprovedAmount ?? stats.totalWithdrawals ?? 0;
+  const pendingWithdrawals = stats.withdrawals?.pendingCount ?? stats.pendingWithdrawals ?? 0;
+
+  const totalTasks = stats.tasks?.totalTasks ?? stats.totalTasks ?? stats.activeTasks ?? 0;
+  const pendingSubmissions = stats.tasks?.pendingSubmissions ?? stats.pendingSubmissions ?? stats.taskStats?.pending ?? 0;
+
+  const totalPlans = stats.plans?.totalPlans ?? stats.totalPlans ?? stats.activePlans ?? 0;
+
+  const totalWalletBalance = stats.wallets?.totalWalletBalance ?? stats.totalWalletBalance ?? 0;
+
+  // Fallback data for charts if missing
   const cashFlowData = stats.cashFlowData && stats.cashFlowData.length > 0 
     ? stats.cashFlowData 
     : fallbackStats.cashFlowData;
@@ -98,58 +111,51 @@ export default function DashboardPage() {
   const cardData = [
     {
       title: 'Total System Users',
-      value: stats.totalUsers ?? 0,
-      description: `${stats.activeUsers ?? 0} active accounts`,
+      value: totalUsers,
+      description: `${activeUsers} Active · ${blockedUsers} Blocked`,
       icon: Users,
       color: 'text-blue-400 bg-blue-500/10 border-blue-500/25',
+      href: '/admin?tab=users',
     },
     {
-      title: 'Total User Balances',
-      value: `₹${(stats.totalWalletBalance ?? 0).toLocaleString('en-IN')}`,
-      description: 'Combined wallet liabilities',
+      title: 'Total Wallet Liabilities',
+      value: `₹${totalWalletBalance.toLocaleString('en-IN')}`,
+      description: 'Combined system balance',
       icon: Coins,
       color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25',
       href: '/admin?tab=users',
     },
     {
-      title: 'Deposits Processed',
-      value: `₹${(stats.totalDeposits ?? 0).toLocaleString('en-IN')}`,
-      description: `${stats.pendingDeposits ?? 0} pending verification`,
+      title: 'Approved Deposits',
+      value: `₹${totalDepositsAmount.toLocaleString('en-IN')}`,
+      description: `${pendingDeposits} Pending verifications`,
       icon: ArrowUpRight,
       color: 'text-teal-400 bg-teal-500/10 border-teal-500/25',
       href: '/admin?tab=deposits',
     },
     {
-      title: 'Withdrawals Requested',
-      value: `₹${(stats.totalWithdrawals ?? 0).toLocaleString('en-IN')}`,
-      description: `${stats.pendingWithdrawals ?? 0} awaiting payout`,
+      title: 'Approved Withdrawals',
+      value: `₹${totalWithdrawalsAmount.toLocaleString('en-IN')}`,
+      description: `${pendingWithdrawals} Pending payouts`,
       icon: ArrowDownLeft,
       color: 'text-rose-400 bg-rose-500/10 border-rose-500/25',
       href: '/admin?tab=withdrawals',
     },
     {
-      title: 'Task Audits',
-      value: `${totalTaskAudits} Claims`,
-      description: `${stats.taskStats?.pending ?? 0} pending audit verifications`,
+      title: 'Task Submissions',
+      value: `${totalTasks} Tasks`,
+      description: `${pendingSubmissions} Pending audits`,
       icon: ClipboardCheck,
       color: 'text-amber-400 bg-amber-500/10 border-amber-500/25',
       href: '/admin?tab=tasks',
     },
     {
       title: 'Subscription Plans',
-      value: stats.totalPlans ?? stats.activePlans ?? 0,
+      value: `${totalPlans} Plans`,
       description: 'Configured packages',
       icon: Gem,
       color: 'text-purple-400 bg-purple-500/10 border-purple-500/25',
       href: '/admin?tab=plans',
-    },
-    {
-      title: 'Active Gift Codes',
-      value: stats.totalGiftCodes ?? stats.activeGiftCodes ?? 0,
-      description: 'Promo balance vouchers',
-      icon: Gift,
-      color: 'text-pink-400 bg-pink-500/10 border-pink-500/25',
-      href: '/admin?tab=gift-codes',
     },
   ];
 

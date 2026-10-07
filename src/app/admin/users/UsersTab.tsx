@@ -43,15 +43,46 @@ import {
   Wallet, 
   Loader2, 
   User,
-  Copy
+  Copy,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Fallback mockup data
 const fallbackUsers = [
-  { id: '6a265cedaa6616b5229e932c', fullName: 'Sandeep Gupta', email: 'sgupta73853@bbdu.ac.in', phoneNumber: '9198140801', balance: 3500, isBlocked: false, isActive: true },
-  { id: '6a256d2e6eb9af80615c2e10', fullName: 'Amit Kumar', email: 'amit@gmail.com', phoneNumber: '9198140802', balance: 450, isBlocked: true, isActive: true },
-  { id: '6a20e4b6035e8afb971f3597', fullName: 'John Doe', email: 'johndoe@example.com', phoneNumber: '9198140803', balance: 120, isBlocked: false, isActive: false },
+  { 
+    id: '6a265cedaa6616b5229e932c', 
+    fullName: 'Sandeep Gupta', 
+    email: 'sgupta73853@bbdu.ac.in', 
+    phoneNumber: '9198140801', 
+    balance: 3500, 
+    isBlocked: false, 
+    isActive: true,
+    referralCode: 'GDPE83A9',
+    referredBy: { fullName: 'System Admin', referralCode: 'SYS0001' }
+  },
+  { 
+    id: '6a256d2e6eb9af80615c2e10', 
+    fullName: 'Amit Kumar', 
+    email: 'amit@gmail.com', 
+    phoneNumber: '9198140802', 
+    balance: 450, 
+    isBlocked: true, 
+    isActive: true,
+    referralCode: 'AMIT9921',
+    referredBy: { fullName: 'Sandeep Gupta', referralCode: 'GDPE83A9' }
+  },
+  { 
+    id: '6a20e4b6035e8afb971f3597', 
+    fullName: 'John Doe', 
+    email: 'johndoe@example.com', 
+    phoneNumber: '9198140803', 
+    balance: 120, 
+    isBlocked: false, 
+    isActive: false,
+    referralCode: 'JOHN1102',
+    referredBy: null
+  },
 ];
 
 const fallbackUpis = [
@@ -69,6 +100,10 @@ export default function UserManagementPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  // User Details Modal state
+  const [selectedUserDetails, setSelectedUserDetails] = useState<any>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const pageParam = searchParams.get('page');
   const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
@@ -129,7 +164,6 @@ export default function UserManagementPage() {
   };
 
   const upiList = getUpisList();
-
 
   // Robust list extractor
   const getUsersList = () => {
@@ -223,6 +257,7 @@ export default function UserManagementPage() {
   };
 
   const getUserUpis = (u: any) => {
+    if (!u) return [];
     if (Array.isArray(u.upis) && u.upis.length > 0) {
       return u.upis;
     }
@@ -245,7 +280,6 @@ export default function UserManagementPage() {
         isPrimary: idx === 0,
       }));
     }
-    // If user object was returned from backend with upi fields, don't fallback to dummy
     if (u.upis !== undefined || u.upi !== undefined || u.upiId !== undefined || u.upiIds !== undefined) {
       return [];
     }
@@ -262,6 +296,10 @@ export default function UserManagementPage() {
     const matchesName = user.fullName?.toLowerCase().includes(term);
     const matchesEmail = user.email?.toLowerCase().includes(term);
     const matchesPhone = user.phoneNumber?.includes(term);
+    const matchesRefCode = user.referralCode?.toLowerCase().includes(term);
+    const matchesInviterName = typeof user.referredBy === 'object' && user.referredBy?.fullName?.toLowerCase().includes(term);
+    const matchesInviterCode = typeof user.referredBy === 'object' && user.referredBy?.referralCode?.toLowerCase().includes(term);
+    const matchesInviterStr = typeof user.referredBy === 'string' && user.referredBy?.toLowerCase().includes(term);
     const matchesUpiId = user.upiId?.toLowerCase().includes(term);
     const matchesUpiObj = user.upi?.upiId?.toLowerCase().includes(term);
     const matchesUpiIds = Array.isArray(user.upiIds) && user.upiIds.some((id: string) => id?.toLowerCase().includes(term));
@@ -269,7 +307,7 @@ export default function UserManagementPage() {
       upi?.upiId?.toLowerCase().includes(term) || upi?.accountHolderName?.toLowerCase().includes(term)
     );
 
-    return matchesName || matchesEmail || matchesPhone || matchesUpiId || matchesUpiObj || matchesUpiIds || matchesUpis;
+    return matchesName || matchesEmail || matchesPhone || matchesRefCode || matchesInviterName || matchesInviterCode || matchesInviterStr || matchesUpiId || matchesUpiObj || matchesUpiIds || matchesUpis;
   });
 
   return (
@@ -277,14 +315,14 @@ export default function UserManagementPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <h1 className="text-3xl font-extrabold tracking-tight text-white font-sans">User Directory</h1>
-          <p className="text-slate-400 text-sm">Control account statuses, manage security holds, and adjust wallet balances.</p>
+          <p className="text-slate-400 text-sm">Control account statuses, manage security holds, inspect referral networks, and adjust wallet balances.</p>
         </div>
         
         {/* Search controls */}
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
           <Input
-            placeholder="Search name, email, or phone..."
+            placeholder="Search name, email, ref code, phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 border-slate-800 bg-slate-900/50 text-white focus-visible:ring-emerald-500"
@@ -320,6 +358,8 @@ export default function UserManagementPage() {
                   <TableRow className="border-slate-850 hover:bg-transparent">
                     <TableHead className="text-slate-400 font-semibold py-3.5">User Profile</TableHead>
                     <TableHead className="text-slate-400 font-semibold py-3.5">Contact</TableHead>
+                    <TableHead className="text-slate-400 font-semibold py-3.5">Referral Code</TableHead>
+                    <TableHead className="text-slate-400 font-semibold py-3.5">Referred By (Inviter)</TableHead>
                     <TableHead className="text-slate-400 font-semibold py-3.5 text-right">Wallet Balance</TableHead>
                     <TableHead className="text-slate-400 font-semibold py-3.5 text-center">UPI</TableHead>
                     <TableHead className="text-slate-400 font-semibold py-3.5 text-center">Account State</TableHead>
@@ -330,17 +370,33 @@ export default function UserManagementPage() {
                   {filteredUsers.map((u: any) => {
                     const userId = u.id || u._id;
                     const userUpis = getUserUpis(u);
+                    const refCode = u.referralCode || 'N/A';
 
                     return (
                       <TableRow key={userId} className="border-slate-850 hover:bg-slate-900/20 transition-colors">
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-300 shrink-0">
+                            <div 
+                              onClick={() => {
+                                setSelectedUserDetails(u);
+                                setIsDetailsOpen(true);
+                              }}
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 transition-colors cursor-pointer shrink-0"
+                              title="Click to view full profile"
+                            >
                               <User className="h-4 w-4" />
                             </div>
                             <div className="flex flex-col min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-semibold text-slate-200 truncate max-w-[120px]">{u.fullName}</span>
+                                <span 
+                                  onClick={() => {
+                                    setSelectedUserDetails(u);
+                                    setIsDetailsOpen(true);
+                                  }}
+                                  className="text-sm font-semibold text-slate-200 truncate max-w-[120px] hover:text-emerald-400 cursor-pointer transition-colors"
+                                >
+                                  {u.fullName}
+                                </span>
                                 {u.isBlocked && (
                                   <Badge variant="destructive" className="bg-rose-500/10 text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 text-[9px] px-1 py-0 shrink-0 font-semibold">
                                     Blocked
@@ -362,6 +418,56 @@ export default function UserManagementPage() {
                             )}
                           </div>
                         </TableCell>
+
+                        {/* Referral Code Column */}
+                        <TableCell>
+                          {refCode !== 'N/A' ? (
+                            <div className="flex items-center gap-1.5 font-mono text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20 w-fit">
+                              <span>{refCode}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(refCode);
+                                  toast.success(`Copied: ${refCode}`);
+                                }}
+                                className="p-0.5 rounded text-emerald-500 hover:text-emerald-300 transition-colors cursor-pointer"
+                                title="Copy Referral Code"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-500 text-xs italic">N/A</span>
+                          )}
+                        </TableCell>
+
+                        {/* Referred By (Inviter) Column */}
+                        <TableCell>
+                          {(() => {
+                            if (!u.referredBy) {
+                              return (
+                                <Badge variant="outline" className="bg-slate-800/40 text-slate-400 border-slate-700/60 text-[10px] font-medium">
+                                  Direct (No Inviter)
+                                </Badge>
+                              );
+                            }
+                            if (typeof u.referredBy === 'object') {
+                              const inviterName = u.referredBy.fullName || u.referredBy.name || u.referredBy.email || 'Inviter';
+                              const inviterCode = u.referredBy.referralCode;
+                              return (
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-medium text-slate-200">{inviterName}</span>
+                                  {inviterCode && (
+                                    <span className="text-[10px] font-mono text-teal-400 font-semibold">({inviterCode})</span>
+                                  )}
+                                </div>
+                              );
+                            }
+                            return <span className="text-xs font-mono text-slate-300">{u.referredBy}</span>;
+                          })()}
+                        </TableCell>
+
                         <TableCell className="text-right">
                           <div className="flex flex-col items-end">
                             <span className="font-bold text-white text-sm">
@@ -427,7 +533,21 @@ export default function UserManagementPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* View Details Button */}
+                            <Button
+                              onClick={() => {
+                                setSelectedUserDetails(u);
+                                setIsDetailsOpen(true);
+                              }}
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8 border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-850 hover:text-white"
+                              title="View Full Profile & Referral Details"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+
                             {/* Wallet Adjust Action */}
                             <Button
                               onClick={() => {
@@ -439,7 +559,7 @@ export default function UserManagementPage() {
                               className="h-8 border-slate-800 bg-slate-950 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 gap-1 text-xs"
                             >
                               <Wallet className="h-3.5 w-3.5" />
-                              Adjust Wallet
+                              Adjust
                             </Button>
 
                             {/* Block Toggle */}
@@ -514,6 +634,191 @@ export default function UserManagementPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* User Details / Profile Modal */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="border-slate-800 bg-slate-900 text-white max-w-lg sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-white">
+              <User className="h-5 w-5 text-emerald-400" />
+              User Profile & Referral Info
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 text-xs">
+              Complete profile view and referral hierarchy for <strong>{selectedUserDetails?.fullName}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUserDetails && (
+            <div className="space-y-5 pt-2">
+              {/* Header profile card */}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-lg shrink-0">
+                    {selectedUserDetails.fullName?.charAt(0) || 'U'}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white">{selectedUserDetails.fullName}</h3>
+                    <p className="text-xs text-slate-400">{selectedUserDetails.email}</p>
+                    <p className="text-[11px] text-slate-500 font-mono mt-0.5">Phone: {selectedUserDetails.phoneNumber}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  {selectedUserDetails.isBlocked ? (
+                    <Badge variant="destructive" className="bg-rose-500/10 text-rose-400 border border-rose-500/20">Blocked</Badge>
+                  ) : selectedUserDetails.isActive ? (
+                    <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20">Active</Badge>
+                  ) : (
+                    <Badge variant="secondary">Deactivated</Badge>
+                  )}
+                  <span className="text-[10px] text-slate-500 font-mono">ID: {selectedUserDetails.id || selectedUserDetails._id}</span>
+                </div>
+              </div>
+
+              {/* Referral details grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Referral Code */}
+                <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    Referral Code
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-base font-bold text-emerald-400">
+                      {selectedUserDetails.referralCode || 'N/A'}
+                    </span>
+                    {selectedUserDetails.referralCode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedUserDetails.referralCode);
+                          toast.success(`Copied: ${selectedUserDetails.referralCode}`);
+                        }}
+                        className="p-1 rounded text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition-colors"
+                        title="Copy Code"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-slate-500">Is user ka unique invite code.</p>
+                </div>
+
+                {/* Invited By */}
+                <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    Invited By (Referrer)
+                  </span>
+                  <div className="flex flex-col">
+                    {(() => {
+                      const inviter = selectedUserDetails.referredBy;
+                      if (!inviter) {
+                        return <span className="text-sm font-medium text-slate-400 italic">Direct Join (No Inviter)</span>;
+                      }
+                      if (typeof inviter === 'object') {
+                        const name = inviter.fullName || inviter.name || inviter.email || 'Inviter';
+                        const code = inviter.referralCode;
+                        return (
+                          <>
+                            <span className="text-sm font-semibold text-slate-200">
+                              {name}
+                            </span>
+                            {code && (
+                              <span className="text-xs font-mono text-teal-400 font-semibold">
+                                Code: {code}
+                              </span>
+                            )}
+                          </>
+                        );
+                      }
+                      return <span className="text-sm font-mono text-slate-200">{inviter}</span>;
+                    })()}
+                  </div>
+                  <p className="text-[10px] text-slate-500">User kis ke referral code se join hua hai.</p>
+                </div>
+              </div>
+
+              {/* Financial Balance Summary */}
+              <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-2.5">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                  Wallet Overview
+                </span>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                    <span className="text-[10px] text-slate-500 block">Balance</span>
+                    <span className="text-sm font-bold text-white">
+                      ₹{(selectedUserDetails.wallet?.balance ?? selectedUserDetails.balance ?? 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                    <span className="text-[10px] text-slate-500 block">Total Credited</span>
+                    <span className="text-sm font-bold text-emerald-400">
+                      ₹{(selectedUserDetails.wallet?.totalCredited ?? 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                    <span className="text-[10px] text-slate-500 block">Total Debited</span>
+                    <span className="text-sm font-bold text-rose-400">
+                      ₹{(selectedUserDetails.wallet?.totalDebited ?? 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* UPI Registered */}
+              <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-2">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                  Registered UPI Addresses
+                </span>
+                {(() => {
+                  const userUpis = getUserUpis(selectedUserDetails);
+                  if (userUpis.length === 0) {
+                    return <p className="text-xs text-slate-500 italic">No UPI registered for this account.</p>;
+                  }
+                  return (
+                    <div className="space-y-1.5">
+                      {userUpis.map((upi: any, idx: number) => {
+                        const upiStr = typeof upi === 'string' ? upi : upi.upiId;
+                        const isPrimary = upi.isPrimary ?? (idx === 0);
+                        if (!upiStr) return null;
+                        return (
+                          <div key={upi._id || upi.id || idx} className="flex items-center justify-between text-xs bg-slate-900/60 p-2 rounded border border-slate-800">
+                            <span className="font-mono text-teal-400 font-semibold">{upiStr}</span>
+                            {isPrimary && (
+                              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[9px]">Primary</Badge>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <DialogFooter className="pt-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDetailsOpen(false)}
+                  className="border-slate-800 text-slate-300 hover:bg-slate-850 hover:text-white"
+                >
+                  Close
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setSelectedUser(selectedUserDetails);
+                    setIsDetailsOpen(false);
+                    setIsAdjustOpen(true);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-1.5"
+                >
+                  <Wallet className="h-4 w-4" />
+                  Adjust Wallet
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Wallet Adjustment Dialog Modal */}
       <Dialog open={isAdjustOpen} onOpenChange={setIsAdjustOpen}>

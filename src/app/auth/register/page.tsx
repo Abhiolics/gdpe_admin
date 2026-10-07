@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { UserPlus, User, Mail, Phone, Lock, Loader2 } from 'lucide-react';
+import { UserPlus, User, Mail, Phone, Lock, Loader2, Share2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -18,6 +18,7 @@ export default function RegisterPage() {
     email: '',
     phoneNumber: '',
     password: '',
+    referralCode: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -123,6 +124,24 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   required
                   className="pl-10 border-slate-800 bg-slate-950 text-white placeholder:text-slate-600 focus-visible:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="referralCode" className="text-slate-300">Referral Code</Label>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">(Optional)</span>
+              </div>
+              <div className="relative">
+                <Share2 className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
+                <Input
+                  id="referralCode"
+                  type="text"
+                  placeholder="GDPE83A9"
+                  value={formData.referralCode}
+                  onChange={handleChange}
+                  className="pl-10 border-slate-800 bg-slate-950 text-emerald-400 font-mono placeholder:text-slate-600 uppercase focus-visible:ring-emerald-500"
                 />
               </div>
             </div>
