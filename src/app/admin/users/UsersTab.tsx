@@ -44,7 +44,11 @@ import {
   Loader2, 
   User,
   Copy,
-  Eye
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -107,13 +111,56 @@ export default function UserManagementPage() {
 
   const pageParam = searchParams.get('page');
   const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [currentPage, setCurrentPage] = useState(initialPage > 0 ? initialPage : 1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  const [mounted, setMounted] = useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Sync currentPage from URL query parameter on navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const p = parseInt(params.get('page') || '1', 10);
+      if (!isNaN(p) && p > 0 && p !== currentPage) {
+        setCurrentPage(p);
+      }
+    }
+  }, [searchParams]);
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', newPage.toString());
-    router.push(`${pathname}?${params.toString()}`);
+    const validPage = Math.max(1, newPage);
+    setCurrentPage(validPage);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'users');
+      params.set('page', validPage.toString());
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'users');
+      params.set('page', '1');
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'users');
+      params.set('page', '1');
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
   };
   
   // Wallet Adjust form state
@@ -122,15 +169,10 @@ export default function UserManagementPage() {
   const [adjustReason, setAdjustReason] = useState('');
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
 
-  const [mounted, setMounted] = useState(false);
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Fetch Users
   const { data: usersRes, isLoading: isQueryLoading, isFetching, error, isError } = useQuery({
-    queryKey: ['admin', 'users', currentPage],
-    queryFn: () => adminApi.getUsers(currentPage),
+    queryKey: ['admin', 'users', currentPage, pageSize],
+    queryFn: () => adminApi.getUsers(currentPage, pageSize),
     enabled: mounted,
     placeholderData: keepPreviousData,
   });
@@ -187,14 +229,41 @@ export default function UserManagementPage() {
 
   const users = getUsersList();
 
-  const getPagination = () => {
-    if (!usersRes) return { page: 1, limit: 10, total: 0, pages: 1 };
-    if (usersRes.data?.data?.pagination) return usersRes.data.data.pagination;
-    if (usersRes.data?.pagination) return usersRes.data.pagination;
-    return { page: 1, limit: 10, total: 0, pages: 1 };
+  // Robust server pagination extractor
+  const extractServerPagination = () => {
+    if (!usersRes?.data) return null;
+    const raw = usersRes.data;
+
+    // Check nested pagination objects
+    const nested = raw.data?.pagination || raw.pagination || raw.meta?.pagination || raw.meta;
+    if (nested && typeof nested === 'object') {
+      const page = Number(nested.page || nested.currentPage || 1);
+      const limit = Number(nested.limit || nested.perPage || nested.pageSize || pageSize);
+      const total = Number(nested.total || nested.totalUsers || nested.totalCount || nested.count || 0);
+      const pages = Number(nested.pages || nested.totalPages || (limit > 0 ? Math.ceil(total / limit) : 1));
+      if (total > 0 || pages > 1) {
+        return { page, limit, total, pages };
+      }
+    }
+
+    // Check direct fields on top-level or data-level
+    const target = raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data) ? raw.data : raw;
+    const directTotal = Number(target.total ?? target.totalUsers ?? target.totalCount ?? target.count);
+    const directPages = Number(target.pages ?? target.totalPages);
+    const directPage = Number(target.page ?? target.currentPage);
+    const directLimit = Number(target.limit ?? target.perPage ?? target.pageSize);
+
+    if (!isNaN(directTotal) && directTotal > 0) {
+      const lim = !isNaN(directLimit) && directLimit > 0 ? directLimit : pageSize;
+      const pgs = !isNaN(directPages) && directPages > 0 ? directPages : Math.max(1, Math.ceil(directTotal / lim));
+      const pg = !isNaN(directPage) && directPage > 0 ? directPage : currentPage;
+      return { page: pg, limit: lim, total: directTotal, pages: pgs };
+    }
+
+    return null;
   };
 
-  const pagination = getPagination();
+  const serverPagination = extractServerPagination();
 
   // Mutation: Block/Unblock
   const toggleBlockMutation = useMutation({
@@ -292,7 +361,8 @@ export default function UserManagementPage() {
   };
 
   const filteredUsers = users.filter((user: any) => {
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
     const matchesName = user.fullName?.toLowerCase().includes(term);
     const matchesEmail = user.email?.toLowerCase().includes(term);
     const matchesPhone = user.phoneNumber?.includes(term);
@@ -310,6 +380,59 @@ export default function UserManagementPage() {
     return matchesName || matchesEmail || matchesPhone || matchesRefCode || matchesInviterName || matchesInviterCode || matchesInviterStr || matchesUpiId || matchesUpiObj || matchesUpiIds || matchesUpis;
   });
 
+  // Server pagination is active if server provides valid pagination metadata, search is empty,
+  // and server total is greater than returned users array length (indicating server-side slicing).
+  const isServerPaginated = Boolean(
+    !searchTerm.trim() &&
+    serverPagination &&
+    serverPagination.total > users.length &&
+    users.length <= serverPagination.limit
+  );
+
+  const effectiveLimit = isServerPaginated && serverPagination ? serverPagination.limit : pageSize;
+  const totalCount = isServerPaginated && serverPagination ? serverPagination.total : filteredUsers.length;
+  const totalPages = isServerPaginated && serverPagination 
+    ? Math.max(1, serverPagination.pages) 
+    : Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+
+  // Current validated active page
+  const activePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  // Users displayed on the current page
+  const displayedUsers = isServerPaginated
+    ? filteredUsers
+    : filteredUsers.slice((activePage - 1) * pageSize, activePage * pageSize);
+
+  const startRecord = totalCount === 0 ? 0 : (activePage - 1) * effectiveLimit + 1;
+  const endRecord = totalCount === 0 ? 0 : Math.min(startRecord + displayedUsers.length - 1, totalCount);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+    if (activePage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, activePage - 1);
+    const end = Math.min(totalPages - 1, activePage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (activePage < totalPages - 2) {
+      pages.push('...');
+    }
+
+    pages.push(totalPages);
+    return pages;
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -324,7 +447,7 @@ export default function UserManagementPage() {
           <Input
             placeholder="Search name, email, ref code, phone..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 border-slate-800 bg-slate-900/50 text-white focus-visible:ring-emerald-500"
           />
         </div>
@@ -367,7 +490,7 @@ export default function UserManagementPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((u: any) => {
+                  {displayedUsers.map((u: any) => {
                     const userId = u.id || u._id;
                     const userUpis = getUserUpis(u);
                     const refCode = u.referralCode || 'N/A';
@@ -469,16 +592,36 @@ export default function UserManagementPage() {
                         </TableCell>
 
                         <TableCell className="text-right">
-                          <div className="flex flex-col items-end">
-                            <span className="font-bold text-white text-sm">
-                              ₹{(u.wallet?.balance ?? u.balance ?? 0).toLocaleString('en-IN')}
-                            </span>
-                            <div className="flex items-center gap-1.5 mt-0.5 text-[9px] font-mono shrink-0">
-                              <span className="text-emerald-400">Cr: ₹{(u.wallet?.totalCredited ?? 0).toLocaleString('en-IN')}</span>
-                              <span className="text-slate-600">|</span>
-                              <span className="text-rose-450">Dr: ₹{(u.wallet?.totalDebited ?? 0).toLocaleString('en-IN')}</span>
-                            </div>
-                          </div>
+                          {(() => {
+                            const totalVal = Number(u.wallet?.total ?? u.total ?? u.wallet?.balance ?? u.balance ?? 0);
+                            const commVal = Number(u.wallet?.commission ?? u.commission ?? 0);
+                            const amtVal = Number(u.wallet?.amount ?? u.amount ?? Math.max(0, totalVal - commVal));
+                            return (
+                              <div className="flex flex-col items-end">
+                                <span className="font-bold text-white text-sm">
+                                  ₹{totalVal.toLocaleString('en-IN')}
+                                </span>
+                                <div className="flex items-center gap-1 mt-0.5 text-[10px] font-mono shrink-0">
+                                  <span className="text-slate-350" title="Base Amount">
+                                    ₹{amtVal.toLocaleString('en-IN')}
+                                  </span>
+                                  <span className="text-slate-500">+</span>
+                                  <span className="text-amber-400 font-semibold" title="Commission">
+                                    ₹{commVal.toLocaleString('en-IN')}
+                                  </span>
+                                  <span className="text-slate-500">=</span>
+                                  <span className="text-emerald-400 font-semibold" title="Total">
+                                    ₹{totalVal.toLocaleString('en-IN')}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-0.5 text-[9px] font-mono shrink-0 text-slate-500">
+                                  <span className="text-emerald-400/80">Cr: ₹{(u.wallet?.totalCredited ?? 0).toLocaleString('en-IN')}</span>
+                                  <span className="text-slate-700">|</span>
+                                  <span className="text-rose-400/80">Dr: ₹{(u.wallet?.totalDebited ?? 0).toLocaleString('en-IN')}</span>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                         <TableCell className="text-center">
                           {userUpis.length === 0 ? (
@@ -600,32 +743,115 @@ export default function UserManagementPage() {
               </Table>
             </div>
             {/* Pagination Controls */}
-            {users.length > 0 && (
-              <div className="flex items-center justify-between border-t border-slate-800 bg-slate-950/45 px-4 py-3">
-                <div className="text-sm text-slate-400">
-                  Showing <span className="font-medium text-white">{(pagination.page - 1) * pagination.limit + 1}</span> to <span className="font-medium text-white">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-medium text-white">{pagination.total}</span> users
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(Math.max(1, pagination.page - 1))}
-                    disabled={pagination.page <= 1}
-                    className="border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-900 hover:text-white"
-                  >
-                    Previous
-                  </Button>
-                  <div className="text-sm text-slate-400 mx-2">
-                    Page {pagination.page} of {pagination.pages}
+            {filteredUsers.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 bg-slate-950/60 px-4 py-3.5">
+                <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-400">
+                  <div>
+                    Showing <span className="font-semibold text-white">{startRecord}</span> to{' '}
+                    <span className="font-semibold text-white">{endRecord}</span> of{' '}
+                    <span className="font-semibold text-white">{totalCount}</span> users
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs">Per page:</span>
+                    <Select
+                      value={pageSize.toString()}
+                      onValueChange={(val) => handlePageSizeChange(parseInt(val || '10', 10))}
+                    >
+                      <SelectTrigger className="h-8 w-18 border-slate-800 bg-slate-900 text-xs text-white">
+                        <SelectValue placeholder="10" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-900 text-white">
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 sm:gap-1.5">
+                  {/* First Page */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handlePageChange(1)}
+                    disabled={activePage <= 1}
+                    className="h-8 w-8 border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white disabled:opacity-40"
+                    title="First Page"
+                  >
+                    <ChevronsLeft className="h-3.5 w-3.5" />
+                  </Button>
+
+                  {/* Previous Page */}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePageChange(Math.min(pagination.pages, pagination.page + 1))}
-                    disabled={pagination.page >= pagination.pages}
-                    className="border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-900 hover:text-white"
+                    onClick={() => handlePageChange(activePage - 1)}
+                    disabled={activePage <= 1}
+                    className="h-8 px-2.5 border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850 hover:text-white disabled:opacity-40 text-xs"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                    Prev
+                  </Button>
+
+                  {/* Page Numbers */}
+                  <div className="hidden sm:flex items-center gap-1 mx-1">
+                    {getPageNumbers().map((p, idx) => {
+                      if (p === '...') {
+                        return (
+                          <span key={`ellipsis-${idx}`} className="px-1 text-slate-500 text-xs select-none">
+                            ...
+                          </span>
+                        );
+                      }
+                      const pageNum = Number(p);
+                      const isCurrent = pageNum === activePage;
+                      return (
+                        <Button
+                          key={`page-${pageNum}`}
+                          variant={isCurrent ? 'default' : 'outline'}
+                          size="icon"
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`h-8 w-8 text-xs font-medium ${
+                            isCurrent
+                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-transparent shadow-sm shadow-emerald-900/50'
+                              : 'border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white'
+                          }`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="sm:hidden text-xs text-slate-400 px-2 font-medium">
+                    {activePage} / {totalPages}
+                  </div>
+
+                  {/* Next Page */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(activePage + 1)}
+                    disabled={activePage >= totalPages}
+                    className="h-8 px-2.5 border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850 hover:text-white disabled:opacity-40 text-xs"
                   >
                     Next
+                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+
+                  {/* Last Page */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={activePage >= totalPages}
+                    className="h-8 w-8 border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white disabled:opacity-40"
+                    title="Last Page"
+                  >
+                    <ChevronsRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
@@ -743,20 +969,34 @@ export default function UserManagementPage() {
                 </span>
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 block">Balance</span>
-                    <span className="text-sm font-bold text-white">
-                      ₹{(selectedUserDetails.wallet?.balance ?? selectedUserDetails.balance ?? 0).toLocaleString('en-IN')}
+                    <span className="text-[10px] text-slate-500 block">Total Balance</span>
+                    <span className="text-sm font-bold text-emerald-400">
+                      ₹{(selectedUserDetails.wallet?.total ?? selectedUserDetails.total ?? selectedUserDetails.wallet?.balance ?? selectedUserDetails.balance ?? 0).toLocaleString('en-IN')}
                     </span>
                   </div>
                   <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 block">Total Credited</span>
-                    <span className="text-sm font-bold text-emerald-400">
+                    <span className="text-[10px] text-slate-500 block">Base Amount</span>
+                    <span className="text-sm font-bold text-slate-200">
+                      ₹{(selectedUserDetails.wallet?.amount ?? selectedUserDetails.amount ?? Math.max(0, (selectedUserDetails.wallet?.balance ?? 0) - (selectedUserDetails.wallet?.commission ?? 0))).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                    <span className="text-[10px] text-slate-500 block">Commission</span>
+                    <span className="text-sm font-bold text-amber-400">
+                      ₹{(selectedUserDetails.wallet?.commission ?? selectedUserDetails.commission ?? 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-center pt-1">
+                  <div className="bg-slate-900/40 p-2 rounded-lg border border-slate-850">
+                    <span className="text-[9px] text-slate-500 block">Total Credited</span>
+                    <span className="text-xs font-semibold text-emerald-400">
                       ₹{(selectedUserDetails.wallet?.totalCredited ?? 0).toLocaleString('en-IN')}
                     </span>
                   </div>
-                  <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 block">Total Debited</span>
-                    <span className="text-sm font-bold text-rose-400">
+                  <div className="bg-slate-900/40 p-2 rounded-lg border border-slate-850">
+                    <span className="text-[9px] text-slate-500 block">Total Debited</span>
+                    <span className="text-xs font-semibold text-rose-400">
                       ₹{(selectedUserDetails.wallet?.totalDebited ?? 0).toLocaleString('en-IN')}
                     </span>
                   </div>

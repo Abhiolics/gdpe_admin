@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { withdrawalApi } from '@/lib/api';
 import { 
   Table, 
@@ -24,6 +25,13 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { 
   Loader2, 
   Check, 
   X, 
@@ -33,7 +41,12 @@ import {
   Building,
   CheckCircle,
   XCircle,
-  Plus
+  Plus,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -72,10 +85,68 @@ const fallbackWithdrawals = [
 ];
 
 export default function WithdrawalManagementPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const queryClient = useQueryClient();
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   
+  const pageParam = searchParams.get('page');
+  const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
+  const [currentPage, setCurrentPage] = useState(initialPage > 0 ? initialPage : 1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  const [mounted, setMounted] = useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Sync currentPage from URL query parameter on navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const p = parseInt(params.get('page') || '1', 10);
+      if (!isNaN(p) && p > 0 && p !== currentPage) {
+        setCurrentPage(p);
+      }
+    }
+  }, [searchParams]);
+
+  const handlePageChange = (newPage: number) => {
+    const validPage = Math.max(1, newPage);
+    setCurrentPage(validPage);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'withdrawals');
+      params.set('page', validPage.toString());
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'withdrawals');
+      params.set('page', '1');
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  };
+
+  const handleTabFilterChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (val: string) => {
+    setSearchTerm(val);
+    setCurrentPage(1);
+  };
+
   // Dialog confirmation states
   const [isApproveOpen, setIsApproveOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -134,16 +205,12 @@ export default function WithdrawalManagementPage() {
     });
   };
 
-  const [mounted, setMounted] = useState(false);
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Fetch withdrawals
-  const { data: withdrawalsRes, isLoading, error, isError } = useQuery({
-    queryKey: ['admin', 'withdrawals'],
-    queryFn: () => withdrawalApi.getAllWithdrawalsAdmin(),
+  const { data: withdrawalsRes, isLoading, isFetching, error, isError } = useQuery({
+    queryKey: ['admin', 'withdrawals', currentPage, pageSize],
+    queryFn: () => withdrawalApi.getAllWithdrawalsAdmin(currentPage, pageSize),
     enabled: mounted,
+    placeholderData: keepPreviousData,
   });
 
   // Robust list extractor
@@ -167,6 +234,40 @@ export default function WithdrawalManagementPage() {
   };
 
   const withdrawals = getWithdrawalsList();
+
+  // Robust server pagination extractor
+  const extractServerPagination = () => {
+    if (!withdrawalsRes?.data) return null;
+    const raw = withdrawalsRes.data;
+
+    const nested = raw.data?.pagination || raw.pagination || raw.meta?.pagination || raw.meta;
+    if (nested && typeof nested === 'object') {
+      const page = Number(nested.page || nested.currentPage || 1);
+      const limit = Number(nested.limit || nested.perPage || nested.pageSize || pageSize);
+      const total = Number(nested.total || nested.totalWithdrawals || nested.totalCount || nested.count || 0);
+      const pages = Number(nested.pages || nested.totalPages || (limit > 0 ? Math.ceil(total / limit) : 1));
+      if (total > 0 || pages > 1) {
+        return { page, limit, total, pages };
+      }
+    }
+
+    const target = raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data) ? raw.data : raw;
+    const directTotal = Number(target.total ?? target.totalWithdrawals ?? target.totalCount ?? target.count);
+    const directPages = Number(target.pages ?? target.totalPages);
+    const directPage = Number(target.page ?? target.currentPage);
+    const directLimit = Number(target.limit ?? target.perPage ?? target.pageSize);
+
+    if (!isNaN(directTotal) && directTotal > 0) {
+      const lim = !isNaN(directLimit) && directLimit > 0 ? directLimit : pageSize;
+      const pgs = !isNaN(directPages) && directPages > 0 ? directPages : Math.max(1, Math.ceil(directTotal / lim));
+      const pg = !isNaN(directPage) && directPage > 0 ? directPage : currentPage;
+      return { page: pg, limit: lim, total: directTotal, pages: pgs };
+    }
+
+    return null;
+  };
+
+  const serverPagination = extractServerPagination();
 
   // Approve Mutation
   const approveMutation = useMutation({
@@ -214,9 +315,69 @@ export default function WithdrawalManagementPage() {
     rejectMutation.mutate(selectedWithdrawal._id || selectedWithdrawal.id);
   };
 
-  const getFilteredWithdrawals = () => {
-    if (activeTab === 'all') return withdrawals;
-    return withdrawals.filter((w: any) => w.status === activeTab);
+  const filteredWithdrawals = withdrawals.filter((w: any) => {
+    if (activeTab !== 'all' && w.status !== activeTab) return false;
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    const name = String(w.user?.fullName || '').toLowerCase();
+    const email = String(w.user?.email || '').toLowerCase();
+    const bank = String(w.bankDetails?.bankName || '').toLowerCase();
+    const acc = String(w.bankDetails?.accountNumber || '').toLowerCase();
+    const ifsc = String(w.bankDetails?.ifscCode || '').toLowerCase();
+    const upi = String(w.bankDetails?.upiId || '').toLowerCase();
+    const amt = String(w.amount || '');
+
+    return name.includes(term) || email.includes(term) || bank.includes(term) || acc.includes(term) || ifsc.includes(term) || upi.includes(term) || amt.includes(term);
+  });
+
+  const isServerPaginated = Boolean(
+    activeTab === 'all' &&
+    !searchTerm.trim() &&
+    serverPagination &&
+    serverPagination.total > withdrawals.length &&
+    withdrawals.length <= serverPagination.limit
+  );
+
+  const effectiveLimit = isServerPaginated && serverPagination ? serverPagination.limit : pageSize;
+  const totalCount = isServerPaginated && serverPagination ? serverPagination.total : filteredWithdrawals.length;
+  const totalPages = isServerPaginated && serverPagination
+    ? Math.max(1, serverPagination.pages)
+    : Math.max(1, Math.ceil(filteredWithdrawals.length / pageSize));
+
+  const activePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const displayedWithdrawals = isServerPaginated
+    ? filteredWithdrawals
+    : filteredWithdrawals.slice((activePage - 1) * pageSize, activePage * pageSize);
+
+  const startRecord = totalCount === 0 ? 0 : (activePage - 1) * effectiveLimit + 1;
+  const endRecord = totalCount === 0 ? 0 : Math.min(startRecord + displayedWithdrawals.length - 1, totalCount);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+    if (activePage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, activePage - 1);
+    const end = Math.min(totalPages - 1, activePage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (activePage < totalPages - 2) {
+      pages.push('...');
+    }
+
+    pages.push(totalPages);
+    return pages;
   };
 
   const getStatusBadge = (status: string) => {
@@ -248,16 +409,29 @@ export default function WithdrawalManagementPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Withdrawal Outflows</h1>
           <p className="text-slate-400 text-sm">Review, copy bank/UPI credentials, and settle payout requests submitted by users.</p>
         </div>
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-2 h-9 px-4 shrink-0 shadow-md shadow-emerald-600/20"
-        >
-          <Plus className="h-4 w-4" />
-          Create Payout
-        </Button>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search user, bank, upi..."
+              value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+            />
+          </div>
+          <Button
+            onClick={() => setIsCreateOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-2 h-9 px-4 shrink-0 shadow-md shadow-emerald-600/20"
+          >
+            <Plus className="h-4 w-4" />
+            Create Payout
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabFilterChange} className="w-full">
         <TabsList className="border-slate-800 bg-slate-900 text-slate-400">
           <TabsTrigger value="all" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white">All Payouts</TabsTrigger>
           <TabsTrigger value="pending" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white">Pending Settle</TabsTrigger>
@@ -277,12 +451,18 @@ export default function WithdrawalManagementPage() {
                 <div className="py-20 text-center text-rose-400 text-sm">
                   Failed to load withdrawals: {error instanceof Error ? error.message : 'Unknown error'}
                 </div>
-              ) : getFilteredWithdrawals().length === 0 ? (
+              ) : filteredWithdrawals.length === 0 ? (
                 <div className="py-20 text-center text-slate-500 text-sm">
                   No withdrawal requests found in this category.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <>
+                  <div className="overflow-x-auto relative">
+                  {isFetching && (
+                    <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+                    </div>
+                  )}
                   <Table>
                     <TableHeader className="border-slate-800 bg-slate-950/45">
                       <TableRow className="border-slate-850 hover:bg-transparent">
@@ -295,7 +475,7 @@ export default function WithdrawalManagementPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getFilteredWithdrawals().map((w: any) => {
+                      {displayedWithdrawals.map((w: any) => {
                         const withdrawalId = w._id || w.id;
                         const userName = w.user?.fullName || 'Sandbox User';
                         const userEmail = w.user?.email || 'user@example.com';
@@ -399,7 +579,122 @@ export default function WithdrawalManagementPage() {
                     </TableBody>
                   </Table>
                 </div>
-              )}
+                {/* Pagination Controls */}
+                {filteredWithdrawals.length > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 bg-slate-950/60 px-4 py-3.5">
+                    <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-400">
+                      <div>
+                        Showing <span className="font-semibold text-white">{startRecord}</span> to{' '}
+                        <span className="font-semibold text-white">{endRecord}</span> of{' '}
+                        <span className="font-semibold text-white">{totalCount}</span> payouts
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 text-xs">Per page:</span>
+                        <Select
+                          value={pageSize.toString()}
+                          onValueChange={(val) => handlePageSizeChange(parseInt(val || '10', 10))}
+                        >
+                          <SelectTrigger className="h-8 w-18 border-slate-800 bg-slate-900 text-xs text-white">
+                            <SelectValue placeholder="10" />
+                          </SelectTrigger>
+                          <SelectContent className="border-slate-800 bg-slate-900 text-white">
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 sm:gap-1.5">
+                      {/* First Page */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePageChange(1)}
+                        disabled={activePage <= 1}
+                        className="h-8 w-8 border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white disabled:opacity-40"
+                        title="First Page"
+                      >
+                        <ChevronsLeft className="h-3.5 w-3.5" />
+                      </Button>
+
+                      {/* Previous Page */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(activePage - 1)}
+                        disabled={activePage <= 1}
+                        className="h-8 px-2.5 border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850 hover:text-white disabled:opacity-40 text-xs"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                        Prev
+                      </Button>
+
+                      {/* Page Numbers */}
+                      <div className="hidden sm:flex items-center gap-1 mx-1">
+                        {getPageNumbers().map((p, idx) => {
+                          if (p === '...') {
+                            return (
+                              <span key={`ellipsis-${idx}`} className="px-1 text-slate-500 text-xs select-none">
+                                ...
+                              </span>
+                            );
+                          }
+                          const pageNum = Number(p);
+                          const isCurrent = pageNum === activePage;
+                          return (
+                            <Button
+                              key={`page-${pageNum}`}
+                              variant={isCurrent ? 'default' : 'outline'}
+                              size="icon"
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`h-8 w-8 text-xs font-medium ${
+                                isCurrent
+                                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-transparent shadow-sm shadow-emerald-900/50'
+                                  : 'border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white'
+                              }`}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="sm:hidden text-xs text-slate-400 px-2 font-medium">
+                        {activePage} / {totalPages}
+                      </div>
+
+                      {/* Next Page */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(activePage + 1)}
+                        disabled={activePage >= totalPages}
+                        className="h-8 px-2.5 border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850 hover:text-white disabled:opacity-40 text-xs"
+                      >
+                        Next
+                        <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                      </Button>
+
+                      {/* Last Page */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={activePage >= totalPages}
+                        className="h-8 w-8 border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white disabled:opacity-40"
+                        title="Last Page"
+                      >
+                        <ChevronsRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
             </CardContent>
           </Card>
         </TabsContent>

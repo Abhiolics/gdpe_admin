@@ -56,7 +56,7 @@ export const authApi = {
 
 export const adminApi = {
   getDashboard: () => apiClient.get('admin/dashboard'),
-  getUsers: (page: number = 1) => apiClient.get(`admin/users?page=${page}`),
+  getUsers: (page: number = 1, limit: number = 10) => apiClient.get(`admin/users?page=${page}&limit=${limit}`),
   getUserDetails: (id: string) => apiClient.get(`admin/users/${id}`),
   blockUser: (id: string) => apiClient.patch(`admin/users/${id}/block`),
   unblockUser: (id: string) => apiClient.patch(`admin/users/${id}/unblock`),
@@ -104,7 +104,7 @@ export const giftCodeApi = {
 };
 
 export const depositApi = {
-  getAllDepositsAdmin: (page: number = 1) => apiClient.get(`deposits/admin?page=${page}`),
+  getAllDepositsAdmin: (page: number = 1, limit: number = 10) => apiClient.get(`deposits/admin?page=${page}&limit=${limit}`),
   approveDeposit: (id: string, reason?: string) => apiClient.put(`deposits/admin/${id}/approve`, { reason }),
   rejectDeposit: (id: string) => apiClient.put(`deposits/admin/${id}/reject`),
   
@@ -116,7 +116,7 @@ export const depositApi = {
 };
 
 export const withdrawalApi = {
-  getAllWithdrawalsAdmin: () => apiClient.get('withdrawals/admin'),
+  getAllWithdrawalsAdmin: (page: number = 1, limit: number = 10) => apiClient.get(`withdrawals/admin?page=${page}&limit=${limit}`),
   approveWithdrawal: (id: string) => apiClient.put(`withdrawals/admin/${id}/approve`),
   rejectWithdrawal: (id: string) => apiClient.put(`withdrawals/admin/${id}/reject`),
   
@@ -177,7 +177,7 @@ export const upiApi = {
   createUpi: (data: { upiId: string; accountHolderName: string; isPrimary: boolean }) => apiClient.post('upi', data),
   updateUpi: (id: string, data: { upiId?: string; accountHolderName?: string; isPrimary?: boolean }) => apiClient.put(`upi/${id}`, data),
   deleteUpi: (id: string) => apiClient.delete(`upi/${id}`),
-  getAllUpisAdmin: () => apiClient.get('upi/admin/all'),
+  getAllUpisAdmin: (page: number = 1, limit: number = 10) => apiClient.get(`upi/admin/all?page=${page}&limit=${limit}`),
 };
 
 export const paymentMethodApi = {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { depositApi } from '@/lib/api';
@@ -27,6 +27,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { 
   Loader2, 
   CheckCircle, 
   XCircle, 
@@ -34,7 +41,11 @@ import {
   FileCheck, 
   ExternalLink,
   Calendar,
-  Layers
+  Layers,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -74,28 +85,60 @@ export default function DepositManagementPage() {
 
   const pageParam = searchParams.get('page');
   const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
-  const [currentPage, setCurrentPage] = useState(initialPage);
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', newPage.toString());
-    router.push(`${pathname}?${params.toString()}`);
-  };
-  
-  // Rejection Form states
-  const [isRejectOpen, setIsRejectOpen] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
+  const [currentPage, setCurrentPage] = useState(initialPage > 0 ? initialPage : 1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   const [mounted, setMounted] = useState(false);
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Sync currentPage from URL query parameter on navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const p = parseInt(params.get('page') || '1', 10);
+      if (!isNaN(p) && p > 0 && p !== currentPage) {
+        setCurrentPage(p);
+      }
+    }
+  }, [searchParams]);
+
+  const handlePageChange = (newPage: number) => {
+    const validPage = Math.max(1, newPage);
+    setCurrentPage(validPage);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'deposits');
+      params.set('page', validPage.toString());
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', 'deposits');
+      params.set('page', '1');
+      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  };
+
+  const handleTabFilterChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+  
+  // Rejection Form states
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+
   // Fetch deposits
   const { data: depositsRes, isLoading: isQueryLoading, isFetching, error, isError } = useQuery({
-    queryKey: ['admin', 'deposits', currentPage],
-    queryFn: () => depositApi.getAllDepositsAdmin(currentPage),
+    queryKey: ['admin', 'deposits', currentPage, pageSize],
+    queryFn: () => depositApi.getAllDepositsAdmin(currentPage, pageSize),
     enabled: mounted,
     placeholderData: keepPreviousData,
   });
@@ -124,14 +167,39 @@ export default function DepositManagementPage() {
 
   const deposits = getDepositsList();
 
-  const getPagination = () => {
-    if (!depositsRes) return { page: 1, limit: 10, total: 0, pages: 1 };
-    if (depositsRes.data?.data?.pagination) return depositsRes.data.data.pagination;
-    if (depositsRes.data?.pagination) return depositsRes.data.pagination;
-    return { page: 1, limit: 10, total: 0, pages: 1 };
+  // Robust server pagination extractor
+  const extractServerPagination = () => {
+    if (!depositsRes?.data) return null;
+    const raw = depositsRes.data;
+
+    const nested = raw.data?.pagination || raw.pagination || raw.meta?.pagination || raw.meta;
+    if (nested && typeof nested === 'object') {
+      const page = Number(nested.page || nested.currentPage || 1);
+      const limit = Number(nested.limit || nested.perPage || nested.pageSize || pageSize);
+      const total = Number(nested.total || nested.totalDeposits || nested.totalCount || nested.count || 0);
+      const pages = Number(nested.pages || nested.totalPages || (limit > 0 ? Math.ceil(total / limit) : 1));
+      if (total > 0 || pages > 1) {
+        return { page, limit, total, pages };
+      }
+    }
+
+    const target = raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data) ? raw.data : raw;
+    const directTotal = Number(target.total ?? target.totalDeposits ?? target.totalCount ?? target.count);
+    const directPages = Number(target.pages ?? target.totalPages);
+    const directPage = Number(target.page ?? target.currentPage);
+    const directLimit = Number(target.limit ?? target.perPage ?? target.pageSize);
+
+    if (!isNaN(directTotal) && directTotal > 0) {
+      const lim = !isNaN(directLimit) && directLimit > 0 ? directLimit : pageSize;
+      const pgs = !isNaN(directPages) && directPages > 0 ? directPages : Math.max(1, Math.ceil(directTotal / lim));
+      const pg = !isNaN(directPage) && directPage > 0 ? directPage : currentPage;
+      return { page: pg, limit: lim, total: directTotal, pages: pgs };
+    }
+
+    return null;
   };
 
-  const pagination = getPagination();
+  const serverPagination = extractServerPagination();
 
   // Approve Mutation
   const approveMutation = useMutation({
@@ -177,9 +245,58 @@ export default function DepositManagementPage() {
     rejectMutation.mutate(selectedDeposit._id || selectedDeposit.id);
   };
 
-  const getFilteredDeposits = () => {
-    if (activeTab === 'all') return deposits;
-    return deposits.filter((d: any) => d.status === activeTab);
+  const filteredDeposits = deposits.filter((d: any) => {
+    if (activeTab === 'all') return true;
+    return d.status === activeTab;
+  });
+
+  const isServerPaginated = Boolean(
+    activeTab === 'all' &&
+    serverPagination &&
+    serverPagination.total > deposits.length &&
+    deposits.length <= serverPagination.limit
+  );
+
+  const effectiveLimit = isServerPaginated && serverPagination ? serverPagination.limit : pageSize;
+  const totalCount = isServerPaginated && serverPagination ? serverPagination.total : filteredDeposits.length;
+  const totalPages = isServerPaginated && serverPagination
+    ? Math.max(1, serverPagination.pages)
+    : Math.max(1, Math.ceil(filteredDeposits.length / pageSize));
+
+  const activePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const displayedDeposits = isServerPaginated
+    ? filteredDeposits
+    : filteredDeposits.slice((activePage - 1) * pageSize, activePage * pageSize);
+
+  const startRecord = totalCount === 0 ? 0 : (activePage - 1) * effectiveLimit + 1;
+  const endRecord = totalCount === 0 ? 0 : Math.min(startRecord + displayedDeposits.length - 1, totalCount);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+    if (activePage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, activePage - 1);
+    const end = Math.min(totalPages - 1, activePage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (activePage < totalPages - 2) {
+      pages.push('...');
+    }
+
+    pages.push(totalPages);
+    return pages;
   };
 
   const getStatusBadge = (status: string) => {
@@ -213,7 +330,7 @@ export default function DepositManagementPage() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabFilterChange} className="w-full">
         <TabsList className="border-slate-800 bg-slate-900 text-slate-400">
           <TabsTrigger value="all" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white">All Deposits</TabsTrigger>
           <TabsTrigger value="pending" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white">Pending Requests</TabsTrigger>
@@ -233,7 +350,7 @@ export default function DepositManagementPage() {
                 <div className="py-20 text-center text-rose-400 text-sm">
                   Failed to load deposits: {error instanceof Error ? error.message : 'Unknown error'}
                 </div>
-              ) : getFilteredDeposits().length === 0 ? (
+              ) : filteredDeposits.length === 0 ? (
                 <div className="py-20 text-center text-slate-500 text-sm">
                   No deposits found in this category.
                 </div>
@@ -257,7 +374,7 @@ export default function DepositManagementPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getFilteredDeposits().map((d: any) => {
+                      {displayedDeposits.map((d: any) => {
                         const depositId = d._id || d.id;
                         const userName = d.user?.fullName || 'Sandbox User';
                         const userEmail = d.user?.email || 'user@example.com';
@@ -330,32 +447,115 @@ export default function DepositManagementPage() {
                   </Table>
                 </div>
                 {/* Pagination Controls */}
-                {deposits.length > 0 && (
-                  <div className="flex items-center justify-between border-t border-slate-800 bg-slate-950/45 px-4 py-3">
-                    <div className="text-sm text-slate-400">
-                      Showing <span className="font-medium text-white">{(pagination.page - 1) * pagination.limit + 1}</span> to <span className="font-medium text-white">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-medium text-white">{pagination.total}</span> deposits
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(Math.max(1, pagination.page - 1))}
-                        disabled={pagination.page <= 1}
-                        className="border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-900 hover:text-white"
-                      >
-                        Previous
-                      </Button>
-                      <div className="text-sm text-slate-400 mx-2">
-                        Page {pagination.page} of {pagination.pages}
+                {filteredDeposits.length > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 bg-slate-950/60 px-4 py-3.5">
+                    <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-400">
+                      <div>
+                        Showing <span className="font-semibold text-white">{startRecord}</span> to{' '}
+                        <span className="font-semibold text-white">{endRecord}</span> of{' '}
+                        <span className="font-semibold text-white">{totalCount}</span> deposits
                       </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 text-xs">Per page:</span>
+                        <Select
+                          value={pageSize.toString()}
+                          onValueChange={(val) => handlePageSizeChange(parseInt(val || '10', 10))}
+                        >
+                          <SelectTrigger className="h-8 w-18 border-slate-800 bg-slate-900 text-xs text-white">
+                            <SelectValue placeholder="10" />
+                          </SelectTrigger>
+                          <SelectContent className="border-slate-800 bg-slate-900 text-white">
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 sm:gap-1.5">
+                      {/* First Page */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePageChange(1)}
+                        disabled={activePage <= 1}
+                        className="h-8 w-8 border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white disabled:opacity-40"
+                        title="First Page"
+                      >
+                        <ChevronsLeft className="h-3.5 w-3.5" />
+                      </Button>
+
+                      {/* Previous Page */}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePageChange(Math.min(pagination.pages, pagination.page + 1))}
-                        disabled={pagination.page >= pagination.pages}
-                        className="border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-900 hover:text-white"
+                        onClick={() => handlePageChange(activePage - 1)}
+                        disabled={activePage <= 1}
+                        className="h-8 px-2.5 border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850 hover:text-white disabled:opacity-40 text-xs"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                        Prev
+                      </Button>
+
+                      {/* Page Numbers */}
+                      <div className="hidden sm:flex items-center gap-1 mx-1">
+                        {getPageNumbers().map((p, idx) => {
+                          if (p === '...') {
+                            return (
+                              <span key={`ellipsis-${idx}`} className="px-1 text-slate-500 text-xs select-none">
+                                ...
+                              </span>
+                            );
+                          }
+                          const pageNum = Number(p);
+                          const isCurrent = pageNum === activePage;
+                          return (
+                            <Button
+                              key={`page-${pageNum}`}
+                              variant={isCurrent ? 'default' : 'outline'}
+                              size="icon"
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`h-8 w-8 text-xs font-medium ${
+                                isCurrent
+                                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-transparent shadow-sm shadow-emerald-900/50'
+                                  : 'border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white'
+                              }`}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="sm:hidden text-xs text-slate-400 px-2 font-medium">
+                        {activePage} / {totalPages}
+                      </div>
+
+                      {/* Next Page */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(activePage + 1)}
+                        disabled={activePage >= totalPages}
+                        className="h-8 px-2.5 border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850 hover:text-white disabled:opacity-40 text-xs"
                       >
                         Next
+                        <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                      </Button>
+
+                      {/* Last Page */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={activePage >= totalPages}
+                        className="h-8 w-8 border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-850 hover:text-white disabled:opacity-40"
+                        title="Last Page"
+                      >
+                        <ChevronsRight className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
