@@ -48,7 +48,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  X,
+  Globe
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -169,12 +171,40 @@ export default function UserManagementPage() {
   const [adjustReason, setAdjustReason] = useState('');
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
 
-  // Fetch Users
-  const { data: usersRes, isLoading: isQueryLoading, isFetching, error, isError } = useQuery({
+  // Debounced search term for API synchronization
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch paginated Users (for default page view)
+  const { 
+    data: usersRes, 
+    isLoading: isPageQueryLoading, 
+    isFetching: isPageFetching, 
+    error, 
+    isError 
+  } = useQuery({
     queryKey: ['admin', 'users', currentPage, pageSize],
     queryFn: () => adminApi.getUsers(currentPage, pageSize),
     enabled: mounted,
     placeholderData: keepPreviousData,
+  });
+
+  // Global All Users query (fetches entire user base from API for comprehensive global search)
+  const { 
+    data: allUsersRes, 
+    isLoading: isAllUsersLoading, 
+    isFetching: isAllUsersFetching 
+  } = useQuery({
+    queryKey: ['admin', 'users', 'all', debouncedSearch],
+    queryFn: () => adminApi.getAllUsers(debouncedSearch || undefined),
+    enabled: mounted,
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
   });
 
   // Fetch UPIs
@@ -183,8 +213,6 @@ export default function UserManagementPage() {
     queryFn: () => upiApi.getAllUpisAdmin(),
     enabled: mounted,
   });
-
-  const isLoading = !mounted || isQueryLoading;
 
   const getUpisList = () => {
     if (!upisRes) return fallbackUpis;
@@ -208,16 +236,16 @@ export default function UserManagementPage() {
   const upiList = getUpisList();
 
   // Robust list extractor
-  const getUsersList = () => {
-    if (!usersRes) return [];
-    const rData = usersRes.data?.data;
+  const extractUsersList = (res: any) => {
+    if (!res) return [];
+    const rData = res.data?.data;
     if (Array.isArray(rData)) return rData;
     if (rData && typeof rData === 'object') {
       for (const key of Object.keys(rData)) {
         if (Array.isArray((rData as any)[key])) return (rData as any)[key];
       }
     }
-    const responseData = usersRes.data;
+    const responseData = res.data;
     if (Array.isArray(responseData)) return responseData;
     if (responseData && typeof responseData === 'object') {
       for (const key of Object.keys(responseData)) {
@@ -227,7 +255,43 @@ export default function UserManagementPage() {
     return [];
   };
 
-  const users = getUsersList();
+  const pagedUsers = extractUsersList(usersRes);
+  const allUsers = extractUsersList(allUsersRes);
+
+  // Active user pool for rendering and global searching
+  const activeUserPool = React.useMemo(() => {
+    const isSearching = Boolean(searchTerm.trim());
+    if (!isSearching) {
+      if (pagedUsers.length > 0) return pagedUsers;
+      if (allUsers.length > 0) return allUsers;
+      return fallbackUsers;
+    }
+
+    // Global search pool: combine allUsers with pagedUsers and fallbackUsers, deduplicated by ID
+    const userMap = new Map<string, any>();
+    allUsers.forEach((u: any) => {
+      const id = String(u.id || u._id || `${u.phoneNumber}-${u.email}`);
+      if (id) userMap.set(id, u);
+    });
+    pagedUsers.forEach((u: any) => {
+      const id = String(u.id || u._id || `${u.phoneNumber}-${u.email}`);
+      if (id && !userMap.has(id)) {
+        userMap.set(id, u);
+      }
+    });
+
+    if (userMap.size === 0) {
+      fallbackUsers.forEach((u: any) => {
+        const id = String(u.id || `${u.phoneNumber}-${u.email}`);
+        userMap.set(id, u);
+      });
+    }
+
+    return Array.from(userMap.values());
+  }, [searchTerm, pagedUsers, allUsers]);
+
+  const isLoading = !mounted || (isPageQueryLoading && pagedUsers.length === 0 && allUsers.length === 0);
+  const isFetching = isPageFetching || (Boolean(searchTerm.trim()) && isAllUsersFetching);
 
   // Robust server pagination extractor
   const extractServerPagination = () => {
@@ -360,33 +424,85 @@ export default function UserManagementPage() {
     });
   };
 
-  const filteredUsers = users.filter((user: any) => {
+  const filteredUsers = React.useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
-    if (!term) return true;
-    const matchesName = user.fullName?.toLowerCase().includes(term);
-    const matchesEmail = user.email?.toLowerCase().includes(term);
-    const matchesPhone = user.phoneNumber?.includes(term);
-    const matchesRefCode = user.referralCode?.toLowerCase().includes(term);
-    const matchesInviterName = typeof user.referredBy === 'object' && user.referredBy?.fullName?.toLowerCase().includes(term);
-    const matchesInviterCode = typeof user.referredBy === 'object' && user.referredBy?.referralCode?.toLowerCase().includes(term);
-    const matchesInviterStr = typeof user.referredBy === 'string' && user.referredBy?.toLowerCase().includes(term);
-    const matchesUpiId = user.upiId?.toLowerCase().includes(term);
-    const matchesUpiObj = user.upi?.upiId?.toLowerCase().includes(term);
-    const matchesUpiIds = Array.isArray(user.upiIds) && user.upiIds.some((id: string) => id?.toLowerCase().includes(term));
-    const matchesUpis = Array.isArray(user.upis) && user.upis.some((upi: any) => 
-      upi?.upiId?.toLowerCase().includes(term) || upi?.accountHolderName?.toLowerCase().includes(term)
-    );
+    if (!term) return activeUserPool;
 
-    return matchesName || matchesEmail || matchesPhone || matchesRefCode || matchesInviterName || matchesInviterCode || matchesInviterStr || matchesUpiId || matchesUpiObj || matchesUpiIds || matchesUpis;
-  });
+    return activeUserPool.filter((user: any) => {
+      const userId = String(user.id || user._id || '').toLowerCase();
+      const matchesId = userId.includes(term);
+      const matchesName = user.fullName?.toLowerCase().includes(term);
+      const matchesEmail = user.email?.toLowerCase().includes(term);
+      const matchesPhone = user.phoneNumber?.includes(term);
+      const matchesRefCode = user.referralCode?.toLowerCase().includes(term);
+
+      // Inviter matching
+      const matchesInviterName = typeof user.referredBy === 'object' && user.referredBy?.fullName?.toLowerCase().includes(term);
+      const matchesInviterCode = typeof user.referredBy === 'object' && user.referredBy?.referralCode?.toLowerCase().includes(term);
+      const matchesInviterStr = typeof user.referredBy === 'string' && user.referredBy?.toLowerCase().includes(term);
+
+      // Wallet matching (balance, amount, commission, credited, debited)
+      const totalVal = String(user.wallet?.total ?? user.total ?? user.wallet?.balance ?? user.balance ?? '');
+      const commVal = String(user.wallet?.commission ?? user.commission ?? '');
+      const amtVal = String(user.wallet?.amount ?? user.amount ?? '');
+      const crVal = String(user.wallet?.totalCredited ?? '');
+      const drVal = String(user.wallet?.totalDebited ?? '');
+      const matchesWallet = 
+        totalVal.includes(term) || 
+        commVal.includes(term) || 
+        amtVal.includes(term) ||
+        crVal.includes(term) ||
+        drVal.includes(term);
+
+      // UPI matching
+      const userUpis = getUserUpis(user);
+      const matchesResolvedUpis = userUpis.some((upi: any) => {
+        const upiStr = typeof upi === 'string' ? upi : upi?.upiId;
+        const nameStr = upi?.accountHolderName || '';
+        return upiStr?.toLowerCase().includes(term) || nameStr?.toLowerCase().includes(term);
+      });
+      const matchesUpiId = user.upiId?.toLowerCase().includes(term);
+      const matchesUpiObj = user.upi?.upiId?.toLowerCase().includes(term);
+      const matchesUpiIds = Array.isArray(user.upiIds) && user.upiIds.some((id: string) => id?.toLowerCase().includes(term));
+      const matchesUpisArray = Array.isArray(user.upis) && user.upis.some((upi: any) => 
+        upi?.upiId?.toLowerCase().includes(term) || upi?.accountHolderName?.toLowerCase().includes(term)
+      );
+
+      // Status matching
+      const matchesStatus = 
+        (term === 'blocked' && user.isBlocked) ||
+        (term === 'unblocked' && !user.isBlocked) ||
+        (term === 'active' && user.isActive) ||
+        (term === 'deactivated' && !user.isActive) ||
+        (term === 'inactive' && !user.isActive);
+
+      return (
+        matchesId ||
+        matchesName ||
+        matchesEmail ||
+        matchesPhone ||
+        matchesRefCode ||
+        matchesInviterName ||
+        matchesInviterCode ||
+        matchesInviterStr ||
+        matchesWallet ||
+        matchesResolvedUpis ||
+        matchesUpiId ||
+        matchesUpiObj ||
+        matchesUpiIds ||
+        matchesUpisArray ||
+        matchesStatus
+      );
+    });
+  }, [searchTerm, activeUserPool, upiList]);
 
   // Server pagination is active if server provides valid pagination metadata, search is empty,
   // and server total is greater than returned users array length (indicating server-side slicing).
   const isServerPaginated = Boolean(
     !searchTerm.trim() &&
     serverPagination &&
-    serverPagination.total > users.length &&
-    users.length <= serverPagination.limit
+    serverPagination.total > pagedUsers.length &&
+    pagedUsers.length <= serverPagination.limit
   );
 
   const effectiveLimit = isServerPaginated && serverPagination ? serverPagination.limit : pageSize;
@@ -434,24 +550,68 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white font-sans">User Directory</h1>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-3xl font-extrabold tracking-tight text-white font-sans">User Directory</h1>
+            <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10 text-xs py-0.5 px-2">
+              <Globe className="h-3 w-3 mr-1" />
+              Global Search
+            </Badge>
+          </div>
           <p className="text-slate-400 text-sm">Control account statuses, manage security holds, inspect referral networks, and adjust wallet balances.</p>
         </div>
         
         {/* Search controls */}
-        <div className="relative w-full md:w-80">
+        <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
           <Input
-            placeholder="Search name, email, ref code, phone..."
+            placeholder="Global search (name, email, phone, ID, wallet...)"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 border-slate-800 bg-slate-900/50 text-white focus-visible:ring-emerald-500"
+            className="pl-10 pr-9 border-slate-800 bg-slate-900/50 text-white focus-visible:ring-emerald-500 placeholder:text-slate-500 text-xs sm:text-sm"
           />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              className="absolute right-2.5 top-2.5 p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              title="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Global search status indicator bar */}
+      {searchTerm.trim() && (
+        <div className="flex items-center justify-between bg-slate-900/70 border border-slate-800/80 px-4 py-2.5 rounded-lg text-xs backdrop-blur-sm">
+          <div className="flex items-center gap-2 text-slate-300">
+            <Globe className="h-4 w-4 text-emerald-400 shrink-0" />
+            <span>
+              Global Search Active: Found <strong className="text-white font-semibold">{filteredUsers.length}</strong> matching {filteredUsers.length === 1 ? 'user' : 'users'} across entire database
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            {isAllUsersFetching && (
+              <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
+                <span>Syncing live API...</span>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSearchChange('')}
+              className="h-6 px-2 text-xs text-slate-400 hover:text-white hover:bg-slate-800"
+            >
+              Reset Search
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-xl shadow-lg">
         <CardContent className="p-0">
@@ -460,13 +620,27 @@ export default function UserManagementPage() {
               <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
               <p className="text-sm text-slate-400">Loading user registry...</p>
             </div>
-          ) : isError ? (
+          ) : isError && activeUserPool.length === 0 ? (
             <div className="py-20 text-center text-rose-400 text-sm">
               Failed to load users: {error instanceof Error ? error.message : 'Unknown error'}
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="py-20 text-center text-slate-500 text-sm">
-              No accounts matching criteria found.
+              {searchTerm.trim() ? (
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-slate-400">No accounts matching &ldquo;{searchTerm}&rdquo; found across the entire user database.</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleSearchChange('')} 
+                    className="border-slate-800 bg-slate-900 text-xs text-slate-300 hover:text-white mt-1"
+                  >
+                    Clear Search
+                  </Button>
+                </div>
+              ) : (
+                'No accounts matching criteria found.'
+              )}
             </div>
           ) : (
             <>
@@ -750,6 +924,9 @@ export default function UserManagementPage() {
                     Showing <span className="font-semibold text-white">{startRecord}</span> to{' '}
                     <span className="font-semibold text-white">{endRecord}</span> of{' '}
                     <span className="font-semibold text-white">{totalCount}</span> users
+                    {searchTerm.trim() && (
+                      <span className="text-emerald-400 text-xs ml-1.5 font-medium">(globally searched)</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-slate-400 text-xs">Per page:</span>

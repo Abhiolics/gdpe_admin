@@ -56,7 +56,28 @@ export const authApi = {
 
 export const adminApi = {
   getDashboard: () => apiClient.get('admin/dashboard'),
-  getUsers: (page: number = 1, limit: number = 10) => apiClient.get(`admin/users?page=${page}&limit=${limit}`),
+  getUsers: (page: number = 1, limit: number = 10, search?: string) => {
+    const params = new URLSearchParams();
+    if (page) params.append('page', page.toString());
+    if (limit) params.append('limit', limit.toString());
+    if (search && search.trim()) {
+      params.append('search', search.trim());
+      params.append('q', search.trim());
+      params.append('query', search.trim());
+    }
+    return apiClient.get(`admin/users?${params.toString()}`);
+  },
+  getAllUsers: (search?: string) => {
+    const params = new URLSearchParams();
+    params.append('page', '1');
+    params.append('limit', '10000');
+    if (search && search.trim()) {
+      params.append('search', search.trim());
+      params.append('q', search.trim());
+      params.append('query', search.trim());
+    }
+    return apiClient.get(`admin/users?${params.toString()}`);
+  },
   getUserDetails: (id: string) => apiClient.get(`admin/users/${id}`),
   blockUser: (id: string) => apiClient.patch(`admin/users/${id}/block`),
   unblockUser: (id: string) => apiClient.patch(`admin/users/${id}/unblock`),
